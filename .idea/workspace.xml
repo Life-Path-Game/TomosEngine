@@ -7,7 +7,7 @@
     <option name="/Default/RiderDebugger/RiderRestoreDecompile/RestoreDecompileSetting/@EntryValue" value="false" type="bool" />
     <option name="/Default/Housekeeping/GlobalSettingsUpgraded/IsUpgraded/@EntryValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
-    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="4" type="long" />
+    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="6" type="long" />
     <option name="/Default/Housekeeping/OptionsDialog/SelectedPageId/@EntryValue" value="CppFormatterOtherPage" type="string" />
   </component>
   <component name="CMakePresetLoader">{
@@ -31,17 +31,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="89292c4c-deb1-4853-954f-531344851b2a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Tomos/Core/Node.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Tomos/Core/Node.hh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.clang-format" beforeDir="false" afterPath="$PROJECT_DIR$/.clang-format" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Tomos.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Tomos.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Tomos/Core/Application/Application.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/Tomos/Core/Application.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Tomos/Core/Application/Application.hh" beforeDir="false" afterPath="$PROJECT_DIR$/src/Tomos/Core/Application.hh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Tomos/Core/Window/Window.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/Tomos/Core/Window.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Tomos/Core/Window/Window.hh" beforeDir="false" afterPath="$PROJECT_DIR$/src/Tomos/Core/Window.hh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Tomos/Core/Node.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/Tomos/Core/Node.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Tomos/Core/Node.hh" beforeDir="false" afterPath="$PROJECT_DIR$/src/Tomos/Core/Node.hh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -152,7 +144,7 @@
       <workItem from="1737244469282" duration="5417000" />
       <workItem from="1737249894702" duration="28083000" />
       <workItem from="1737312023155" duration="4000" />
-      <workItem from="1737312044971" duration="563000" />
+      <workItem from="1737312044971" duration="10208000" />
     </task>
     <servers />
   </component>
