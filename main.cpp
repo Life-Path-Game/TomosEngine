@@ -1,8 +1,8 @@
 #include <iostream>
 
+#include "src/Tomos/Core/Application.hh"
 #include "src/Tomos/Util/Logger/Logger.hh"
-#include "src/Tomos/Core/Application/Application.hh"
-//uwu
+// uwu
 using namespace Tomos;
 
 int main()

@@ -3,10 +3,10 @@
 //
 #include "Window.hh"
 
-#include "../../Events/Application/ApplicationEvent.hh"
-#include "../../Events/Key/KeyEvent.hh"
-#include "../../Events/Mouse/MouseEvent.hh"
-#include "../../Util/Logger/Logger.hh"
+#include "../Events/Application/ApplicationEvent.hh"
+#include "../Events/Key/KeyEvent.hh"
+#include "../Events/Mouse/MouseEvent.hh"
+#include "../Util/Logger/Logger.hh"
 
 
 namespace Tomos

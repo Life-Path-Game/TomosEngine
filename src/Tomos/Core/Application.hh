@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-#include "../Window/Window.hh"
+#include "Window.hh"
 
 namespace Tomos
 {

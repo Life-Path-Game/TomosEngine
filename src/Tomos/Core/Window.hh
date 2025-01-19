@@ -6,7 +6,7 @@
 #include <functional>
 #include <string>
 
-#include "../../Events/Event.hh"
+#include "../Events/Event.hh"
 
 namespace Tomos
 {

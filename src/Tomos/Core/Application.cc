@@ -4,8 +4,8 @@
 
 #include "Application.hh"
 
-#include "../../Util/Logger/Logger.hh"
-#include "../../Events/Application/ApplicationEvent.hh"
+#include "../Events/Application/ApplicationEvent.hh"
+#include "../Util/Logger/Logger.hh"
 
 namespace Tomos
 {
