@@ -55,6 +55,7 @@ namespace Tomos
 
         LayerStack layerStack;
 
+        g
         static Application* instance;
         State               state;
     };
