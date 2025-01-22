@@ -1,15 +1,13 @@
 #include <iostream>
 
-#include "src/Tomos/Core/Application.hh"
-#include "src/Tomos/Util/Logger/Logger.hh"
-// uwu
+#include "src/Tomos/core/Application.hh"
+#include "src/Tomos/util/logger/Logger.hh"
+
 using namespace Tomos;
 
 int main()
 {
-    Logger::setBuildType( BuildType::DEBUG );
-
-    Application::app().run();
+    Application::get()->run();
 
     return 0;
 }
