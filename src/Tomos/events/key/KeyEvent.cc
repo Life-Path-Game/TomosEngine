@@ -16,14 +16,14 @@ namespace Tomos
     std::string KeyPressedEvent::toString() const
     {
         std::stringstream ss;
-        ss << "KeyPressedEvent: " << keyCode << " ( " << repeatCount << " repeats )";
+        ss << "KeyPressedEvent: " << m_keyCode << " ( " << m_repeatCount << " repeats )";
         return ss.str();
     }
 
     std::string KeyReleasedEvent::toString() const
     {
         std::stringstream ss;
-        ss << "KeyReleasedEvent: " << keyCode;
+        ss << "KeyReleasedEvent: " << m_keyCode;
         return ss.str();
     }
-}  // namespace Tomos
+} // namespace Tomos

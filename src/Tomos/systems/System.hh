@@ -3,7 +3,7 @@
 #include <map>
 #include <typeindex>
 
-#include "../core/Node.hh"
+#include "Tomos/core/Node.hh"
 #include "Component.hh"
 
 namespace Tomos
@@ -17,8 +17,8 @@ namespace Tomos
         virtual void update() {};
         virtual void lateUpdate() {};
 
-        virtual void componentAdded( std::shared_ptr<Component> component, std::shared_ptr<Node> node ) {};
-        virtual void componentRemoved( std::shared_ptr<Component> component, std::shared_ptr<Node> node ) {};
+        virtual void componentAdded( std::shared_ptr<Component> p_component, std::shared_ptr<Node> p_node ) {};
+        virtual void componentRemoved( std::shared_ptr<Component> p_component, std::shared_ptr<Node> p_node ) {};
 
         virtual std::type_index getComponentType() const { return typeid( nullptr ); };
 

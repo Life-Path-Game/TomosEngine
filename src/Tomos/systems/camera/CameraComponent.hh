@@ -6,15 +6,14 @@
 
 namespace Tomos
 {
-
     class CameraComponent : public Component
     {
     public:
-        CameraComponent( float fov = 45.0f, float near = 0.1f, float far = 100.0f, const std::string& name = "Camera" );
+        explicit CameraComponent( float p_fov = 45.0f, float p_near = 0.1f, float p_far = 100.0f, const std::string& p_name = "Camera" );
 
-        void setFov( float fov );
-        void setNear( float near );
-        void setFar( float far );
+        void setFov( float p_fov );
+        void setNear( float p_near );
+        void setFar( float p_far );
 
         float getFov() const;
         float getNear() const;
@@ -23,18 +22,17 @@ namespace Tomos
         glm::mat4 getProjection();
         glm::mat4 getInvProjection();
 
-        bool active = true;
+        bool m_active = true;
 
     protected:
         void recompute();
 
-        glm::mat4 projection    = glm::mat4( 1.0f );
-        glm::mat4 invProjection = glm::mat4( 1.0f );
-        bool      dirty;
-        float     fov;
-        float     far;
-        float     near;
-        float     aspectRatio = 0.0f;
+        glm::mat4 m_projection    = glm::mat4( 1.0f );
+        glm::mat4 m_invProjection = glm::mat4( 1.0f );
+        bool      m_dirty{};
+        float     m_fov{};
+        float     m_far{};
+        float     m_near{};
+        float     m_aspectRatio = 0.0f;
     };
-
-}  // namespace Tomos
+} // namespace Tomos

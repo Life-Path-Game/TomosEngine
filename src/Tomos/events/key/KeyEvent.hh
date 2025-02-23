@@ -7,39 +7,39 @@ namespace Tomos
     class KeyEvent : public Event
     {
     public:
-        inline int  getKeyCode() const { return keyCode; }
-        virtual int getCategoryFlags() const override;
+        inline int  getKeyCode() const { return m_keyCode; }
+        int getCategoryFlags() const override;
 
     protected:
-        KeyEvent( int keyCode ) : keyCode( keyCode ) {}
+        explicit KeyEvent( int p_keyCode ) : m_keyCode( p_keyCode ) {}
 
-        int keyCode;
+        int m_keyCode;
     };
 
     class KeyPressedEvent : public KeyEvent
     {
     public:
-        KeyPressedEvent( int keyCode, int repeatCount ) : KeyEvent( keyCode ), repeatCount( repeatCount ) {}
+        KeyPressedEvent( int p_keyCode, int p_repeatCount ) : KeyEvent( p_keyCode ), m_repeatCount( p_repeatCount ) {}
 
-        inline int getRepeatCount() const { return repeatCount; }
+        inline int getRepeatCount() const { return m_repeatCount; }
 
-        virtual EventType   getEventType() const override { return EventType::KEY_PRESSED; }
+        EventType   getEventType() const override { return EventType::KEY_PRESSED; }
         static EventType    getStaticType() { return EventType::KEY_PRESSED; }
-        virtual const char* getName() const override { return "KeyPressedEvent"; }
+        const char* getName() const override { return "KeyPressedEvent"; }
         std::string         toString() const override;
 
     protected:
-        int repeatCount;
+        int m_repeatCount;
     };
 
     class KeyReleasedEvent : public KeyEvent
     {
     public:
-        KeyReleasedEvent( int keyCode ) : KeyEvent( keyCode ) {}
+        explicit KeyReleasedEvent( int p_keyCode ) : KeyEvent( p_keyCode ) {}
 
-        virtual EventType   getEventType() const override { return EventType::KEY_RELEASED; }
+        EventType   getEventType() const override { return EventType::KEY_RELEASED; }
         static EventType    getStaticType() { return EventType::KEY_RELEASED; }
-        virtual const char* getName() const override { return "KeyReleasedEvent"; }
+        const char* getName() const override { return "KeyReleasedEvent"; }
         std::string         toString() const override;
     };
 

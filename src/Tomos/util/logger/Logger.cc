@@ -8,58 +8,51 @@
 
 namespace Tomos
 {
-
     Logger& Logger::getInstance()
     {
         static Logger instance;
         return instance;
     }
 
-    Logger& Logger::operator<<( ManipFn manip )
+    Logger& Logger::operator<<( ManipFn p_manip )
     {
-        std::lock_guard<std::mutex> lock( mutex_ );
-        manip( std::cout );
+        std::lock_guard<std::mutex> lock( m_mutex );
+        p_manip( std::cout );
         return *this;
     }
 
-    Logger& Logger::log( LogLevel level, const std::source_location location )
+    Logger& Logger::log( LogLevel p_level, const std::source_location p_location )
     {
+        std::cout << "\033[0m";
+
         Logger& instance = getInstance();
 
-        if ( instance.quiet && ( instance.currentLevel != LogLevel::WARN && instance.currentLevel != LogLevel::ERROR ) )
-        {
-            return instance;
-        }
-
-        std::lock_guard<std::mutex> lock( instance.mutex_ );
-        instance.setLogLevel( level );
-        std::cout << std::endl
-                  << instance.getTimestamp() << instance.getColorPrefix() << " " << location.function_name() << ": ";
+        std::lock_guard<std::mutex> lock( instance.m_mutex );
+        instance.setLogLevel( p_level );
+        std::cout << std::endl << instance.getPrefix() << " " << p_location.function_name() << ": ";
         return instance;
     }
 
-    void Logger::setDestination( LogDestination destination )
-    {
-        // Not implemented
-    }
+    void Logger::setLogLevel( LogLevel p_level ) { m_currentLevel = p_level; }
 
-    void Logger::setLogLevel( LogLevel level ) { currentLevel = level; }
-
-    std::string Logger::getColorPrefix()
+    std::string Logger::getPrefix()
     {
-        switch ( currentLevel )
+        std::string prefix = getTimestamp();
+        switch ( m_currentLevel )
         {
             case LogLevel::DEBUG:
-                return "[DEBUG] ";
+                return "\033[32m" + getTimestamp() + "[DEBUG] ";
             case LogLevel::INFO:
-                return "[INFO] ";
+                return "\033[36m" + getTimestamp() + "[INFO]  ";
             case LogLevel::WARN:
-                return "[WARN] ";
+                return "\033[33m" + getTimestamp() + "[WARN]  ";
             case LogLevel::ERROR:
-                return "[ERROR] ";
+                return "\033[31m" + getTimestamp() + "[ERROR] ";
             default:
-                return "";
+                break;
         }
+
+        return prefix;
     }
 
     std::string Logger::getTimestamp()
@@ -72,9 +65,7 @@ namespace Tomos
 
         std::ostringstream oss;
         oss << "[" << std::put_time( &local_tm, "%Y-%m-%d %H:%M:%S" ) << "." << std::setfill( '0' ) << std::setw( 3 )
-            << ms.count() << "] ";
+                << ms.count() << "] ";
         return oss.str();
     }
-
-
-}  // namespace Tomos
+} // namespace Tomos

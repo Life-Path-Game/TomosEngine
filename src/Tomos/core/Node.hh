@@ -8,23 +8,25 @@
 #include <memory>
 #include <set>
 
-#include "../systems/Component.hh"
-#include "../util/transform/Transform.hh"
+#include "Tomos/systems/Component.hh"
+#include "Tomos/util/logger/Logger.hh"
+#include "Tomos/util/transform/Transform.hh"
 
 namespace Tomos
 {
     class Node : public std::enable_shared_from_this<Node>
     {
     public:
-        Node( const std::string& name = "UnnamedNode" );
-        virtual ~Node() { destroy(); };
+        explicit Node( const std::string& p_name = "UnnamedNode" );
+        virtual  ~Node() { destroy(); };
 
-        void addChild( const std::shared_ptr<Node>& child );
-        bool removeChild( const std::shared_ptr<Node>& child );
-        void traverse( const std::function<void( Node& )>& before, const std::function<void( Node& )>& after );
+        void                                   addChild( const std::shared_ptr<Node>& p_child );
+        bool                                   removeChild( const std::shared_ptr<Node>& p_child );
+        void                                   traverse( const std::function<void( Node& )>& p_before, const std::function<void( Node& )>& p_after );
+        const std::set<std::shared_ptr<Node>>& getChildren() const { return m_children; }
 
-        void addComponent( const std::shared_ptr<Component>& component );
-        void removeComponent( const std::shared_ptr<Component>& component );
+        void addComponent( const std::shared_ptr<Component>& p_component );
+        void removeComponent( const std::shared_ptr<Component>& p_component );
 
         bool isInScene() const;
 
@@ -35,30 +37,44 @@ namespace Tomos
                                          unsigned int                        maxDepth = 333 ) const;
 
         template<typename T>
-        std::shared_ptr<Component> assertComponent() const;
+        std::shared_ptr<T> assertComponent() const;
 
         template<typename T>
-        std::shared_ptr<Component> assertChildComponent() const;
+        std::shared_ptr<T> assertChildComponent() const;
 
         std::shared_ptr<Node> assertChildByName( const std::string& name, unsigned int maxDepth = 333 ) const;
 
-        static void updateTransforms( Node& node );
+        std::string m_name{};
+        Transform   m_transform;
 
-        std::string name;
-        Transform   transform;
+        void setActive( bool p_active );
+        bool isActive() const { return m_active; }
 
     protected:
-        std::weak_ptr<Node>                     parent;
-        std::set<std::shared_ptr<Node>>         children;
-        std::vector<std::shared_ptr<Component>> components;
+        std::weak_ptr<Node>                     m_parent{};
+        std::set<std::shared_ptr<Node>>         m_children;
+        std::vector<std::shared_ptr<Component>> m_components;
+
+        bool m_active = true;
     };
 
-    class Scene : public Node
+    static void updateTransforms( Node* node )
+    {
+        for ( const auto& c : node->getChildren() )
+        {
+            c->m_transform.updateGlobal( node->m_transform );
+            updateTransforms( c.get() );
+        }
+    }
+
+    class SceneNode : public Node
     {
     public:
-        Scene( const std::string& name = "UnnamedScene" ) : Node( name ) {}
+        explicit SceneNode( const std::string& p_name = "SceneNode" ) :
+            Node( p_name )
+        {
+        }
 
-        void computeTransforms() { updateTransforms( *this ); }
+        void computeTransforms() { updateTransforms( this ); }
     };
-
-}  // namespace Tomos
+} // namespace Tomos

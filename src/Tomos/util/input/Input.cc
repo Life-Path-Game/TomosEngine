@@ -9,9 +9,9 @@
 namespace Tomos
 {
 
-    bool Input::isKeyDown( int keycode )
+    bool Input::isKeyDown( int p_keycode )
     {
-        auto state = glfwGetKey( Application::get()->getWindow().getNativeWindow(), keycode );
+        auto state = glfwGetKey( Application::get()->getWindow().getNativeWindow(), p_keycode );
 
         if ( state == GLFW_PRESS || state == GLFW_REPEAT )
         {
@@ -21,9 +21,9 @@ namespace Tomos
         return false;
     }
 
-    bool Input::isMouseDown( int button )
+    bool Input::isMouseDown( int p_button )
     {
-        auto state = glfwGetMouseButton( Application::get()->getWindow().getNativeWindow(), button );
+        auto state = glfwGetMouseButton( Application::get()->getWindow().getNativeWindow(), p_button );
 
         if ( state == GLFW_PRESS )
         {

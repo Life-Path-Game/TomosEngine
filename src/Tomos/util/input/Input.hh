@@ -9,9 +9,9 @@ namespace Tomos
     class Input
     {
     public:
-        static bool isKeyDown( int keycode );
+        static bool isKeyDown( int p_keycode );
 
-        static bool   isMouseDown( int button );
+        static bool   isMouseDown( int p_button );
         static double getMouseX();
         static double getMouseY();
         static std::pair<double, double> getMousePos();

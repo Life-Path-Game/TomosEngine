@@ -144,4 +144,18 @@ readability-static-accessed-through-instance,
 readability-static-definition-in-anonymous-namespace,
 readability-string-compare,
 readability-uniqueptr-delete-release,
+readability-identifier-naming
 readability-use-anyofallof'
+
+CheckOptions:
+  # Class member variables (prefix: m_)
+  - key: readability-identifier-naming.MemberCase
+    value: camelBack
+  - key: readability-identifier-naming.MemberPrefix
+    value: m_
+
+  # Function parameters (prefix: p_)
+  - key: readability-identifier-naming.ParameterCase
+    value: camelBack
+  - key: readability-identifier-naming.ParameterPrefix
+    value: p_
