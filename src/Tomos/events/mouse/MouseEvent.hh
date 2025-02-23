@@ -7,71 +7,71 @@ namespace Tomos
     class MouseMovedEvent : public Event
     {
     public:
-        MouseMovedEvent( double x, double y ) : x( x ), y( y ) {}
+        MouseMovedEvent( double p_x, double p_y ) : m_x( p_x ), m_y( p_y ) {}
 
-        inline double getX() const { return x; }
-        inline double getY() const { return y; }
+        inline double getX() const { return m_x; }
+        inline double getY() const { return m_y; }
 
-        virtual EventType   getEventType() const override { return EventType::MOUSE_MOVED; }
-        virtual int         getCategoryFlags() const override;
+        EventType   getEventType() const override { return EventType::MOUSE_MOVED; }
+        int         getCategoryFlags() const override;
         static EventType    getStaticType() { return EventType::MOUSE_MOVED; }
-        virtual const char* getName() const override { return "MouseMovedEvent"; }
+        const char* getName() const override { return "MouseMovedEvent"; }
         std::string         toString() const override;
 
     private:
-        double x, y;
+        double m_x, m_y;
     };
 
     class MouseScrolledEvent : public Event
     {
     public:
-        MouseScrolledEvent( double xOffset, double yOffset ) : xOffset( xOffset ), yOffset( yOffset ) {}
+        MouseScrolledEvent( double p_xOffset, double p_yOffset ) : m_xOffset( p_xOffset ), m_yOffset( p_yOffset ) {}
 
-        inline double getXOffset() const { return xOffset; }
-        inline double getYOffset() const { return yOffset; }
+        inline double getXOffset() const { return m_xOffset; }
+        inline double getYOffset() const { return m_yOffset; }
 
-        virtual EventType   getEventType() const override { return EventType::MOUSE_SCROLLED; }
-        virtual int         getCategoryFlags() const override;
+        EventType   getEventType() const override { return EventType::MOUSE_SCROLLED; }
+        int         getCategoryFlags() const override;
         static EventType    getStaticType() { return EventType::MOUSE_SCROLLED; }
-        virtual const char* getName() const override { return "MouseScrolledEvent"; }
+        const char* getName() const override { return "MouseScrolledEvent"; }
         std::string         toString() const override;
 
     protected:
-        double xOffset, yOffset;
+        double m_xOffset, m_yOffset;
     };
 
     class MouseButtonEvent : public Event
     {
     public:
-        inline int getButton() const { return button; }
+        inline int getButton() const { return m_button; }
 
-        virtual int getCategoryFlags() const override;
+        int getCategoryFlags() const override;
 
     protected:
-        MouseButtonEvent( int button ) : button( button ) {}
+        explicit MouseButtonEvent( int p_button ) : m_button( p_button ) {}
 
-        int button;
+        int m_button;
     };
 
     class MouseButtonPressedEvent : public MouseButtonEvent
     {
     public:
-        MouseButtonPressedEvent( int button ) : MouseButtonEvent( button ) {}
+        explicit MouseButtonPressedEvent( int p_button ) : MouseButtonEvent( p_button ) {}
 
-        virtual EventType   getEventType() const override { return EventType::MOUSE_BUTTON_PRESSED; }
+        EventType   getEventType() const override { return EventType::MOUSE_BUTTON_PRESSED; }
         static EventType    getStaticType() { return EventType::MOUSE_BUTTON_PRESSED; }
-        virtual const char* getName() const override { return "MouseButtonPressedEvent"; }
+        const char* getName() const override { return "MouseButtonPressedEvent"; }
         std::string         toString() const override;
     };
 
     class MouseButtonReleasedEvent : public MouseButtonEvent
     {
     public:
-        MouseButtonReleasedEvent( int button ) : MouseButtonEvent( button ) {}
+        explicit MouseButtonReleasedEvent( int p_button ) : MouseButtonEvent( p_button ) {}
 
-        virtual EventType   getEventType() const override { return EventType::MOUSE_BUTTON_RELEASED; }
+        EventType   getEventType() const override { return EventType::MOUSE_BUTTON_RELEASED; }
         static EventType    getStaticType() { return EventType::MOUSE_BUTTON_RELEASED; }
-        virtual const char* getName() const override { return "MouseButtonReleasedEvent"; }
+        const char* getName() const override { return "MouseButtonReleasedEvent"; }
         std::string         toString() const override;
     };
 

@@ -4,37 +4,47 @@
 
 #include "Layer.hh"
 
+#include "Tomos/util/logger/Logger.hh"
+
 namespace Tomos
 {
+    LayerStack::LayerStack() { m_layerInsert = m_layers.begin(); }
 
-    LayerStack::LayerStack() { layerInsert = layers.begin(); }
-
-    LayerStack::~LayerStack() {}
-
-    void LayerStack::pushLayer( std::unique_ptr<Layer> layer )
+    LayerStack::~LayerStack()
     {
-        layerInsert = layers.insert( layerInsert, std::move( layer ) );
-    }
-
-    void LayerStack::pushOverlay( std::unique_ptr<Layer> overlay ) { layers.push_back( std::move( overlay ) ); }
-
-    void LayerStack::popLayer( std::unique_ptr<Layer> layer )
-    {
-        auto it = std::find( layers.begin(), layers.end(), layer );
-        if ( it != layers.end() )
+        for ( Layer* layer : m_layers )
         {
-            layers.erase( it );
-            layerInsert--;
+            delete layer;
         }
     }
 
-    void LayerStack::popOverlay( std::unique_ptr<Layer> overlay )
+    void LayerStack::pushLayer( Layer* p_layer )
     {
-        auto it = std::find( layers.begin(), layers.end(), overlay );
-        if ( it != layers.end() )
-        {
-            layers.erase( it );
-        }
+        m_layerInsert = m_layers.insert( m_layerInsert, p_layer );
     }
 
-}  // namespace Tomos
+    void LayerStack::pushOverlay( Layer* p_overlay ) { m_layers.push_back( p_overlay ); }
+
+    void LayerStack::popLayer( Layer* p_layer )
+    {
+        LOG_DEBUG() << "Start";
+        auto it = std::find( m_layers.begin(), m_layers.end(), p_layer );
+        if ( it != m_layers.end() )
+        {
+            m_layers.erase( it );
+            m_layerInsert--;
+        }
+        LOG_DEBUG() << "End";
+    }
+
+    void LayerStack::popOverlay( Layer* p_overlay )
+    {
+        LOG_DEBUG() << "Start";
+        auto it = std::find( m_layers.begin(), m_layers.end(), p_overlay );
+        if ( it != m_layers.end() )
+        {
+            m_layers.erase( it );
+        }
+        LOG_DEBUG() << "End";
+    }
+} // namespace Tomos

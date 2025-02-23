@@ -4,10 +4,10 @@
 #include <iostream>
 #include <mutex>
 #include <source_location>
+#include <cassert>
 
 namespace Tomos
 {
-
     enum class LogLevel
     {
         INFO,
@@ -28,53 +28,51 @@ namespace Tomos
         static Logger& getInstance();
 
         template<typename T>
-        Logger& operator<<( const T& message )
+        Logger& operator<<( const T& p_message )
         {
-            if ( quiet && ( currentLevel != LogLevel::WARN && currentLevel != LogLevel::ERROR ) )
-            {
-                return *this;
-            }
-
-            std::lock_guard<std::mutex> lock( mutex_ );
-            std::cout << message << std::flush;
+            std::lock_guard<std::mutex> lock( m_mutex );
+            std::cout << p_message << std::flush;
             return *this;
         }
 
         typedef std::ostream& ( *ManipFn )( std::ostream& );
-        Logger& operator<<( ManipFn manip );
+        Logger&                  operator<<( ManipFn p_manip );
 
-        static Logger& log( LogLevel                   level    = LogLevel::INFO,
-                            const std::source_location location = std::source_location::current() );
-
-        static void setDestination( LogDestination destination );
-
-        static void setQuiet( bool quiet ) { getInstance().quiet = quiet; }
+        static Logger& log( LogLevel             p_level    = LogLevel::INFO,
+                            std::source_location p_location = std::source_location::current() );
 
     private:
-        Logger() : currentLevel( LogLevel::INFO ) {}
+        Logger() :
+            m_currentLevel( LogLevel::INFO )
+        {
+        }
+
         ~Logger() = default;
 
         Logger( const Logger& )            = delete;
         Logger& operator=( const Logger& ) = delete;
 
-        std::mutex mutex_;
-        LogLevel   currentLevel;
+        std::mutex m_mutex{};
+        LogLevel   m_currentLevel;
 
         std::string getTimestamp();
-        std::string getColorPrefix();
-        void        setLogLevel( LogLevel level );
-
-        bool quiet = false;
+        std::string getPrefix();
+        void        setLogLevel( LogLevel p_level );
     };
-
-}  // namespace Tomos
+} // namespace Tomos
 
 // ======= MACROS FOR LOGGING =======
 
-// Always log INFO, WARN, and ERROR
+// Always log INFO, WARN, and ERROR, ASSERT
 #define LOG_INFO() Tomos::Logger::log( Tomos::LogLevel::INFO )
 #define LOG_WARN() Tomos::Logger::log( Tomos::LogLevel::WARN )
 #define LOG_ERROR() Tomos::Logger::log( Tomos::LogLevel::ERROR )
+#define LOG_ASSERT( p_expression )  \
+    if ( !( p_expression ) )        \
+    {                               \
+        std::cout << "\n";          \
+        assert( p_expression );     \
+    }
 
 // Only for debug builds
 #ifndef NDEBUG

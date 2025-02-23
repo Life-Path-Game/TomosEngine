@@ -17,7 +17,7 @@ namespace Tomos
     std::string MouseMovedEvent::toString() const
     {
         std::stringstream ss;
-        ss << "MouseMovedEvent: " << x << ", " << y;
+        ss << "MouseMovedEvent: " << m_x << ", " << m_y;
         return ss.str();
     }
 
@@ -29,7 +29,7 @@ namespace Tomos
     std::string MouseScrolledEvent::toString() const
     {
         std::stringstream ss;
-        ss << "MouseScrolledEvent: " << xOffset << ", " << yOffset;
+        ss << "MouseScrolledEvent: " << m_xOffset << ", " << m_yOffset;
         return ss.str();
     }
 
@@ -42,14 +42,14 @@ namespace Tomos
     std::string MouseButtonPressedEvent::toString() const
     {
         std::stringstream ss;
-        ss << "MouseButtonPressedEvent: " << button;
+        ss << "MouseButtonPressedEvent: " << m_button;
         return ss.str();
     }
 
     std::string MouseButtonReleasedEvent::toString() const
     {
         std::stringstream ss;
-        ss << "MouseButtonReleasedEvent: " << button;
+        ss << "MouseButtonReleasedEvent: " << m_button;
         return ss.str();
     }
 

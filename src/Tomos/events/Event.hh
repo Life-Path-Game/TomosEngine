@@ -26,11 +26,11 @@ namespace Tomos
 
     enum class EventCategory
     {
-        NONE         = 0,
-        APPLICATION  = 1 << 0,
-        INPUT        = 1 << 1,
-        KEYBOARD     = 1 << 2,
-        MOUSE        = 1 << 3,
+        NONE = 0,
+        APPLICATION = 1 << 0,
+        INPUT = 1 << 1,
+        KEYBOARD = 1 << 2,
+        MOUSE = 1 << 3,
         MOUSE_BUTTON = 1 << 4
     };
 
@@ -39,18 +39,18 @@ namespace Tomos
         friend class EventDispatcher;
 
     public:
-        virtual EventType   getEventType() const     = 0;
+        virtual EventType   getEventType() const = 0;
         virtual int         getCategoryFlags() const = 0;
-        virtual const char* getName() const          = 0;
+        virtual const char* getName() const = 0;
         virtual std::string toString() const;
         static EventType    getStaticType() { return EventType::NONE; }
 
-        inline bool isInCategory( EventCategory category ) const;
-        inline bool isHandled() const { return handled; }
+        inline bool isInCategory( EventCategory p_category ) const;
+        inline bool isHandled() const { return m_handled; }
 
     protected:
-        bool      handled = false;
-        EventType type    = EventType::NONE;
+        bool      m_handled = false;
+        EventType m_type    = EventType::NONE;
     };
 
     class EventDispatcher
@@ -59,21 +59,23 @@ namespace Tomos
         using EventFn = std::function<bool( T& )>;
 
     public:
-        EventDispatcher( Event& event ) : event( event ) {}
+        explicit EventDispatcher( Event& p_event ) :
+            m_event( p_event )
+        {
+        }
 
         template<typename T>
-        bool dispatch( EventFn<T> func )
+        bool dispatch( EventFn<T> p_func )
         {
-            if ( event.getEventType() == T::getStaticType() )
+            if ( m_event.getEventType() == T::getStaticType() )
             {
-                event.handled = func( *( T* ) &event );
+                m_event.m_handled = p_func( *( T* ) &m_event );
                 return true;
             }
             return false;
         }
 
     private:
-        Event& event;
+        Event& m_event;
     };
-
-}  // namespace Tomos
+} // namespace Tomos

@@ -3,22 +3,21 @@
 //
 #include "Window.hh"
 
-#include "../events/application/ApplicationEvent.hh"
-#include "../events/key/KeyEvent.hh"
-#include "../events/mouse/MouseEvent.hh"
-#include "../util/logger/Logger.hh"
+#include "Tomos/events/application/ApplicationEvent.hh"
+#include "Tomos/events/key/KeyEvent.hh"
+#include "Tomos/events/mouse/MouseEvent.hh"
+#include "Tomos/util/logger/Logger.hh"
 
 
 namespace Tomos
 {
-
-    Window::Window( const WindowProps& props )
+    Window::Window( const WindowProps& p_props )
     {
-        data.title  = props.title;
-        data.width  = props.width;
-        data.height = props.height;
+        m_data.m_title  = p_props.m_title;
+        m_data.m_width  = p_props.m_width;
+        m_data.m_height = p_props.m_height;
 
-        LOG_INFO() << "Creating window " << data.title << " (" << data.width << ", " << data.height << ")";
+        LOG_INFO() << "Creating m_window " << m_data.m_title << " (" << m_data.m_width << ", " << m_data.m_height << ")";
 
         if ( !glfwInit() )
         {
@@ -30,9 +29,9 @@ namespace Tomos
         glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
         glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
-        window = glfwCreateWindow( data.width, data.height, data.title.c_str(), nullptr, nullptr );
-        glfwMakeContextCurrent( window );
-        glfwSetWindowUserPointer( window, &data );
+        m_window = glfwCreateWindow( m_data.m_width, m_data.m_height, m_data.m_title.c_str(), nullptr, nullptr );
+        glfwMakeContextCurrent( m_window );
+        glfwSetWindowUserPointer( m_window, &m_data );
 
         glewExperimental = GL_TRUE;
         if ( glewInit() != GLEW_OK )
@@ -43,94 +42,96 @@ namespace Tomos
 
         LOG_INFO() << "OpenGL Version: " << glGetString( GL_VERSION );
 
-        glfwSetErrorCallback( []( int error, const char* description )
-                              { LOG_ERROR() << "GLFW Error (" << error << "): " << description; } );
+        glfwSetErrorCallback( []( int p_error, const char* p_description )
+        {
+            LOG_ERROR() << "GLFW Error (" << p_error << "): " << p_description;
+        } );
 
-        glfwSetWindowSizeCallback( window,
-                                   []( GLFWwindow* window, int width, int height )
+        glfwSetWindowSizeCallback( m_window,
+                                   []( GLFWwindow* p_window, int p_width, int p_height )
                                    {
-                                       WindowData& data = *( WindowData* ) glfwGetWindowUserPointer( window );
-                                       data.width       = width;
-                                       data.height      = height;
+                                       WindowData& data = *( WindowData* ) glfwGetWindowUserPointer( p_window );
+                                       data.m_width     = p_width;
+                                       data.m_height    = p_height;
 
-                                       WindowResizeEvent event( width, height );
-                                       data.eventCallback( event );
+                                       WindowResizeEvent event( p_width, p_height );
+                                       data.m_eventCallback( event );
                                    } );
 
-        glfwSetWindowCloseCallback( window,
-                                    []( GLFWwindow* window )
+        glfwSetWindowCloseCallback( m_window,
+                                    []( GLFWwindow* p_window )
                                     {
-                                        WindowData&      data = *( WindowData* ) glfwGetWindowUserPointer( window );
+                                        WindowData&      data = *( WindowData* ) glfwGetWindowUserPointer( p_window );
                                         WindowCloseEvent event;
-                                        data.eventCallback( event );
+                                        data.m_eventCallback( event );
                                     } );
 
-        glfwSetKeyCallback( window,
-                            []( GLFWwindow* window, int key, int scancode, int action, int mods )
+        glfwSetKeyCallback( m_window,
+                            []( GLFWwindow* p_window, int p_key, int p_scancode, int p_action, int p_mods )
                             {
-                                WindowData& data = *( WindowData* ) glfwGetWindowUserPointer( window );
+                                WindowData& data = *( WindowData* ) glfwGetWindowUserPointer( p_window );
 
-                                switch ( action )
+                                switch ( p_action )
                                 {
                                     case GLFW_PRESS:
                                     {
-                                        KeyPressedEvent event( key, 0 );
-                                        data.eventCallback( event );
+                                        KeyPressedEvent event( p_key, 0 );
+                                        data.m_eventCallback( event );
                                         break;
                                     }
                                     case GLFW_RELEASE:
                                     {
-                                        KeyReleasedEvent event( key );
-                                        data.eventCallback( event );
+                                        KeyReleasedEvent event( p_key );
+                                        data.m_eventCallback( event );
                                         break;
                                     }
                                     case GLFW_REPEAT:
                                     {
-                                        KeyPressedEvent event( key, 1 );
-                                        data.eventCallback( event );
+                                        KeyPressedEvent event( p_key, 1 );
+                                        data.m_eventCallback( event );
                                         break;
                                     }
                                 }
                             } );
 
-        glfwSetMouseButtonCallback( window,
-                                    []( GLFWwindow* window, int button, int action, int mods )
+        glfwSetMouseButtonCallback( m_window,
+                                    []( GLFWwindow* p_window, int p_button, int p_action, int p_mods )
                                     {
-                                        WindowData& data = *( WindowData* ) glfwGetWindowUserPointer( window );
+                                        WindowData& data = *( WindowData* ) glfwGetWindowUserPointer( p_window );
 
-                                        switch ( action )
+                                        switch ( p_action )
                                         {
                                             case GLFW_PRESS:
                                             {
-                                                MouseButtonPressedEvent event( button );
-                                                data.eventCallback( event );
+                                                MouseButtonPressedEvent event( p_button );
+                                                data.m_eventCallback( event );
                                                 break;
                                             }
                                             case GLFW_RELEASE:
                                             {
-                                                MouseButtonReleasedEvent event( button );
-                                                data.eventCallback( event );
+                                                MouseButtonReleasedEvent event( p_button );
+                                                data.m_eventCallback( event );
                                                 break;
                                             }
                                         }
                                     } );
 
-        glfwSetScrollCallback( window,
-                               []( GLFWwindow* window, double xOffset, double yOffset )
+        glfwSetScrollCallback( m_window,
+                               []( GLFWwindow* p_window, double p_xOffset, double p_yOffset )
                                {
-                                   WindowData& data = *( WindowData* ) glfwGetWindowUserPointer( window );
+                                   WindowData& data = *( WindowData* ) glfwGetWindowUserPointer( p_window );
 
-                                   MouseScrolledEvent event( xOffset, yOffset );
-                                   data.eventCallback( event );
+                                   MouseScrolledEvent event( p_xOffset, p_yOffset );
+                                   data.m_eventCallback( event );
                                } );
 
-        glfwSetCursorPosCallback( window,
-                                  []( GLFWwindow* window, double xPos, double yPos )
+        glfwSetCursorPosCallback( m_window,
+                                  []( GLFWwindow* p_window, double p_xPos, double p_yPos )
                                   {
-                                      WindowData& data = *( WindowData* ) glfwGetWindowUserPointer( window );
+                                      WindowData& data = *( WindowData* ) glfwGetWindowUserPointer( p_window );
 
-                                      MouseMovedEvent event( xPos, yPos );
-                                      data.eventCallback( event );
+                                      MouseMovedEvent event( p_xPos, p_yPos );
+                                      data.m_eventCallback( event );
                                   } );
     }
 
@@ -138,8 +139,8 @@ namespace Tomos
 
     void Window::shutdown()
     {
-        // We only support one window for now
-        glfwDestroyWindow( window );
+        // We only support one m_window for now
+        glfwDestroyWindow( m_window );
         glfwTerminate();
     }
 
@@ -147,15 +148,14 @@ namespace Tomos
     void Window::onUpdate()
     {
         glfwPollEvents();
-        glfwSwapBuffers( window );
+        glfwSwapBuffers( m_window );
     }
 
-    unsigned int Window::getWidth() const { return data.width; }
+    unsigned int Window::getWidth() const { return m_data.m_width; }
 
-    unsigned int Window::getHeight() const { return data.height; }
+    unsigned int Window::getHeight() const { return m_data.m_height; }
 
-    void Window::setEventCallback( const EventCallback& callback ) { data.eventCallback = callback; }
+    void Window::setEventCallback( const EventCallback& p_callback ) { m_data.m_eventCallback = p_callback; }
 
-    GLFWwindow* Window::getNativeWindow() const { return window; }
-
-}  // namespace Tomos
+    GLFWwindow* Window::getNativeWindow() const { return m_window; }
+} // namespace Tomos

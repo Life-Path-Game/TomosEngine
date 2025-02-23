@@ -1,29 +1,29 @@
 #pragma once
 
 #include <memory>
-#include <string>
 
-#include "../util/input/Input.hh"
+#include "Tomos/util/input/Input.hh"
 #include "Ecs.hh"
 #include "Layer.hh"
-#include "Node.hh"
 #include "Window.hh"
+#include "Tomos/util/time/Time.hh"
 
 namespace Tomos
 {
     class WindowCloseEvent;
+    class Application;
 
-    struct State
+    class State
     {
-        ECS   ecs   = ECS();
-        Scene scene = Scene( "main" );
+        friend class Application;
 
-        Input input = Input();
+    public:
+        ECS        m_ecs;
+        LayerStack m_layerStack;
+        Input      m_input;
+        Time       m_time;
 
-        unsigned int gameTime;
-        unsigned int deltaTime;
-
-        float aspectRatio = 16.0f / 9.0f;
+        float m_aspectRatio = 1;
     };
 
     class Application
@@ -33,15 +33,15 @@ namespace Tomos
 
         void run();
 
-        void onEvent( Event& e );
-        bool onWindowClose( WindowCloseEvent& e );
+        void onEvent( Event& p_e );
+        bool onWindowClose( WindowCloseEvent& p_e );
 
         Window& getWindow() const;
 
-        State& getState() { return state; }
+        State& getState() { return m_state; }
 
-        void PushLayer( std::unique_ptr<Layer> layer );
-        void PushOverlay( std::unique_ptr<Layer> overlay );
+        void PushLayer( Layer* p_layer );
+        void PushOverlay( Layer* p_overlay );
 
     private:
         Application();
@@ -49,15 +49,11 @@ namespace Tomos
         Application( const Application& )            = delete;
         Application& operator=( const Application& ) = delete;
 
-        std::unique_ptr<Window> window;
+        std::unique_ptr<Window> m_window{};
 
-        bool running = true;
-
-        LayerStack layerStack;
-
-        g
-        static Application* instance;
-        State               state;
+        bool m_running = true;
+        
+        static Application* g_instance;
+        State               m_state;
     };
-
-}  // namespace Tomos
+} // namespace Tomos
