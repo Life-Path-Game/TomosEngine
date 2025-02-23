@@ -52,7 +52,7 @@ namespace Tomos
         std::unique_ptr<Window> m_window{};
 
         bool m_running = true;
-        
+
         static Application* g_instance;
         State               m_state;
     };
