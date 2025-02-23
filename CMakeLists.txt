@@ -3,9 +3,9 @@ project(Tomos)
 
 set(CMAKE_CXX_STANDARD 23)
 
-find_package(glm CONFIG REQUIRED)
+find_package(glm 1.0 CONFIG REQUIRED)
 find_package(glfw3 3.4 REQUIRED)
-find_package(GLEW REQUIRED)
+find_package(GLEW 2.1 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 # Gather all .cc files recursively
