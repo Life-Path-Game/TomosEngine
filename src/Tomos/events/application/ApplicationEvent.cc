@@ -11,7 +11,7 @@ namespace Tomos
     std::string WindowResizeEvent::toString() const
     {
         std::stringstream ss;
-        ss << "WindowResizeEvent: " << width << ", " << height;
+        ss << "WindowResizeEvent: " << m_width << ", " << m_height;
         return ss.str();
     }
 
@@ -22,4 +22,4 @@ namespace Tomos
     std::string AppUpdateEvent::toString() const { return getName(); }
 
     std::string AppRenderEvent::toString() const { return getName(); }
-}  // namespace Tomos
+} // namespace Tomos

@@ -7,66 +7,66 @@ namespace Tomos
     class WindowResizeEvent : public Event
     {
     public:
-        WindowResizeEvent( int width, int height ) : width( width ), height( height ) {}
+        WindowResizeEvent( int p_width, int p_height ) : m_width( p_width ), m_height( p_height ) {}
 
-        inline unsigned int getWidth() const { return width; }
-        inline unsigned int getHeight() const { return height; }
+        inline unsigned int getWidth() const { return m_width; }
+        inline unsigned int getHeight() const { return m_height; }
 
-        virtual EventType   getEventType() const override { return EventType::WINDOW_RESIZE; }
+        EventType   getEventType() const override { return EventType::WINDOW_RESIZE; }
         static EventType    getStaticType() { return EventType::WINDOW_RESIZE; }
-        virtual const char* getName() const override { return "WindowResizeEvent"; }
-        virtual int         getCategoryFlags() const override { return static_cast<int>( EventCategory::APPLICATION ); }
+        const char* getName() const override { return "WindowResizeEvent"; }
+        int         getCategoryFlags() const override { return static_cast<int>( EventCategory::APPLICATION ); }
         std::string         toString() const override;
 
     private:
-        unsigned int width, height;
+        unsigned int m_width, m_height;
     };
 
     class WindowCloseEvent : public Event
     {
     public:
-        WindowCloseEvent() {}
+        WindowCloseEvent() = default;
 
-        virtual EventType   getEventType() const override { return EventType::WINDOW_CLOSE; }
+        EventType   getEventType() const override { return EventType::WINDOW_CLOSE; }
         static EventType    getStaticType() { return EventType::WINDOW_CLOSE; }
-        virtual const char* getName() const override { return "WindowCloseEvent"; }
-        virtual int         getCategoryFlags() const override { return static_cast<int>( EventCategory::APPLICATION ); }
+        const char* getName() const override { return "WindowCloseEvent"; }
+        int         getCategoryFlags() const override { return static_cast<int>( EventCategory::APPLICATION ); }
         std::string         toString() const override;
     };
 
     class AppTickEvent : public Event
     {
     public:
-        AppTickEvent() {}
+        AppTickEvent() = default;
 
-        virtual EventType   getEventType() const override { return EventType::APP_TICK; }
+        EventType   getEventType() const override { return EventType::APP_TICK; }
         static EventType    getStaticType() { return EventType::APP_TICK; }
-        virtual const char* getName() const override { return "AppTickEvent"; }
-        virtual int         getCategoryFlags() const override { return static_cast<int>( EventCategory::APPLICATION ); }
+        const char* getName() const override { return "AppTickEvent"; }
+        int         getCategoryFlags() const override { return static_cast<int>( EventCategory::APPLICATION ); }
         std::string         toString() const override;
     };
 
     class AppUpdateEvent : public Event
     {
     public:
-        AppUpdateEvent() {}
+        AppUpdateEvent() = default;
 
-        virtual EventType   getEventType() const override { return EventType::APP_UPDATE; }
+        EventType   getEventType() const override { return EventType::APP_UPDATE; }
         static EventType    getStaticType() { return EventType::APP_UPDATE; }
-        virtual const char* getName() const override { return "AppUpdateEvent"; }
-        virtual int         getCategoryFlags() const override { return static_cast<int>( EventCategory::APPLICATION ); }
+        const char* getName() const override { return "AppUpdateEvent"; }
+        int         getCategoryFlags() const override { return static_cast<int>( EventCategory::APPLICATION ); }
         std::string         toString() const override;
     };
 
     class AppRenderEvent : public Event
     {
     public:
-        AppRenderEvent() {}
+        AppRenderEvent() = default;
 
-        virtual EventType   getEventType() const override { return EventType::APP_RENDER; }
+        EventType   getEventType() const override { return EventType::APP_RENDER; }
         static EventType    getStaticType() { return EventType::APP_RENDER; }
-        virtual const char* getName() const override { return "AppRenderEvent"; }
-        virtual int         getCategoryFlags() const override { return static_cast<int>( EventCategory::APPLICATION ); }
+        const char* getName() const override { return "AppRenderEvent"; }
+        int         getCategoryFlags() const override { return static_cast<int>( EventCategory::APPLICATION ); }
         std::string         toString() const override;
     };
 

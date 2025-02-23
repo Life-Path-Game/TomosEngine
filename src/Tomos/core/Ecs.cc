@@ -6,31 +6,36 @@
 
 namespace Tomos
 {
-    void ECS::registerComponent( const std::shared_ptr<Component>& component, const std::shared_ptr<Node>& node )
+    void ECS::registerComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
     {
-        auto t = typeid( *component ).hash_code();
+        LOG_DEBUG() << "Start";
+        auto t = typeid( *p_component ).hash_code();
         for ( auto& [_, system] : systems )
         {
             if ( system->getComponentType().hash_code() == t )
             {
-                system->componentAdded( component, node );
+                system->componentAdded( p_component, p_node );
+                LOG_DEBUG() << "End";
                 return;
             }
         }
-        LOG_WARN() << "No system found for component: " << component->name;
+        LOG_WARN() << "No system found for component: " << p_component->m_name;
     }
 
-    void ECS::destroyComponent( const std::shared_ptr<Component>& component, const std::shared_ptr<Node>& node )
+    void ECS::destroyComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
     {
-        auto t = typeid( *component ).hash_code();
+        LOG_DEBUG() << "Start";
+        auto t = typeid( *p_component ).hash_code();
         for ( auto& [_, system] : systems )
         {
             if ( system->getComponentType().hash_code() == t )
             {
-                system->componentRemoved( component, node );
+                system->componentRemoved( p_component, p_node );
+                LOG_DEBUG() << "End";
                 return;
             }
         }
+        LOG_WARN() << "No system found for component: " << p_component->m_name;
     }
 
 
@@ -57,5 +62,4 @@ namespace Tomos
             system->lateUpdate();
         }
     }
-
-}  // namespace Tomos
+} // namespace Tomos

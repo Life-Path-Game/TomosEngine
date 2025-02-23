@@ -8,7 +8,7 @@ namespace Tomos
     public:
         virtual ~Component() = default;
 
-        std::string name;
+        std::string m_name{};
     };
 
 }  // namespace Tomos

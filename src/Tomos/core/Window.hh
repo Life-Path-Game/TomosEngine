@@ -6,18 +6,18 @@
 #include <functional>
 #include <string>
 
-#include "../events/Event.hh"
+#include "Tomos/events/Event.hh"
 
 namespace Tomos
 {
     struct WindowProps
     {
-        std::string  title;
-        unsigned int width;
-        unsigned int height;
+        std::string  m_title{};
+        unsigned int m_width;
+        unsigned int m_height;
 
-        explicit WindowProps( const std::string& title = "Tomos Engine", unsigned int width = 1280,
-                              unsigned int height = 720 ) : title( title ), width( width ), height( height )
+        explicit WindowProps( const std::string& p_title = "Tomos Engine", unsigned int p_width = 1280,
+                              unsigned int p_height = 720 ) : m_title( p_title ), m_width( p_width ), m_height( p_height )
         {
         }
     };
@@ -27,7 +27,7 @@ namespace Tomos
     public:
         using EventCallback = std::function<void( Event& )>;
 
-        Window( const WindowProps& props );
+        explicit Window( const WindowProps& p_props );
         ~Window();
 
         void shutdown();
@@ -37,20 +37,20 @@ namespace Tomos
         unsigned int getHeight() const;
         unsigned int getWidth() const;
 
-        void setEventCallback( const EventCallback& callback );
+        void setEventCallback( const EventCallback& p_callback );
 
         GLFWwindow* getNativeWindow() const;
 
     private:
-        GLFWwindow* window;
+        GLFWwindow* m_window{};
 
         struct WindowData
         {
-            std::string  title;
-            unsigned int width, height;
+            std::string  m_title{};
+            unsigned int m_width{}, m_height{};
 
-            EventCallback eventCallback;
-        } data;
+            EventCallback m_eventCallback{};
+        } m_data;
     };
 
 }  // namespace Tomos

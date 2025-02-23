@@ -9,30 +9,32 @@ namespace Tomos
     class Transform
     {
     public:
-        Transform( const glm::vec3& translation = glm::vec3( 0.0f ),
-                   const glm::quat& rotation    = glm::quat( 1.0f, 0.0f, 0.0f, 0.0f ),
-                   const glm::vec3& scale       = glm::vec3( 1.0f ) );
+        explicit Transform( const glm::vec3& p_translation = glm::vec3( 0.0f, 0.0f, 0.0f ),
+                   const glm::quat& p_rotation    = glm::quat( 1.0f, 0.0f, 0.0f, 0.0f ),
+                   const glm::vec3& p_scale       = glm::vec3( 1.0f ) );
 
         void update();
-        void updateGlobal( const Transform& parent );
+        void updateGlobal( const Transform& p_parent );
 
         const glm::mat4& getLocalMatrix();
         const glm::mat4& getLocalInvMatrix();
 
-        glm::mat4 globMat;
-        glm::mat4 globInvMat;
+        glm::mat4 m_globMat;
+        glm::mat4 m_globInvMat;
+
+        glm::vec3 m_translation;
+        glm::quat m_rotation;
+        glm::vec3 m_scale;
+
+        const glm::mat4& getLocalMatrix() const { return m_localMat; }
+        const glm::mat4& getLocalInvMatrix() const { return m_localInvMat; }
 
     private:
         void updateLocal();
 
-        glm::mat4 localMat;
-        glm::mat4 localInvMat;
+        glm::mat4 m_localMat;
+        glm::mat4 m_localInvMat;
 
-        glm::vec3 translation;
-        glm::quat rotation;
-        glm::vec3 scale;
-
-        bool dirty;
+        bool m_dirty;
     };
-
-}  // namespace Tomos
+} // namespace Tomos

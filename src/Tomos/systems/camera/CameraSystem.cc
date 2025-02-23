@@ -4,7 +4,7 @@
 
 #include "CameraSystem.hh"
 
-#include "../../util/logger/Logger.hh"
+#include "Tomos/util/logger/Logger.hh"
 
 namespace Tomos
 {
@@ -29,7 +29,7 @@ namespace Tomos
                                  []( std::pair<std::shared_ptr<Component>, std::shared_ptr<Node>> pair )
                                  {
                                      auto c = std::dynamic_pointer_cast<CameraComponent>( pair.first );
-                                     return ( c && c->active );
+                                     return ( c && c->m_active && pair.second->isActive() );
                                  } );
 
         if ( cam == components.end() )
@@ -38,21 +38,22 @@ namespace Tomos
             return;
         }
 
-        auto cc = std::dynamic_pointer_cast<CameraComponent>( cam->first );
-        auto tc = cam->second->transform;
+        auto cc        = std::dynamic_pointer_cast<CameraComponent>( cam->first );
+        m_activeCamera = cc;
+        auto tc        = cam->second->m_transform;
 
-        viewMtx = tc.globInvMat;
+        m_viewMat = tc.m_globInvMat;
 
-        viewMtxInv = tc.globMat;
+        m_viewMatInv = tc.m_globMat;
 
-        viewProjMtx = cc->getProjection() * viewMtx;
+        m_viewProjMat = cc->getProjection() * m_viewMat;
 
-        viewProjMtxInv = viewMtxInv * cc->getInvProjection();
+        m_viewProjMatInv = m_viewMatInv * cc->getInvProjection();
     }
 
     std::shared_ptr<Node> CameraSystem::getActiveCameraNode() const
     {
-        auto c = std::dynamic_pointer_cast<Component>( activeCamera );
+        auto c = std::dynamic_pointer_cast<Component>( m_activeCamera );
         if ( c )
         {
             auto n = components.find( c );
@@ -65,4 +66,28 @@ namespace Tomos
         return nullptr;
     }
 
-}  // namespace Tomos
+    const std::shared_ptr<CameraComponent>& CameraSystem::getActiveCamera() const
+    {
+        return m_activeCamera;
+    }
+
+    const glm::mat4& CameraSystem::getViewProjectionMat() const
+    {
+        return m_viewProjMat;
+    }
+
+    const glm::mat4& CameraSystem::getViewProjectionInvMat() const
+    {
+        return m_viewProjMatInv;
+    }
+
+    const glm::mat4& CameraSystem::getViewMat() const
+    {
+        return m_viewMat;
+    }
+
+    const glm::mat4& CameraSystem::getViewInvMat() const
+    {
+        return m_viewMatInv;
+    }
+} // namespace Tomos

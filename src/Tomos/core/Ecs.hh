@@ -3,13 +3,12 @@
 #include <memory>
 #include <unordered_map>
 
-#include "../systems/System.hh"
-#include "../util/logger/Logger.hh"
+#include "Tomos/systems/System.hh"
+#include "Tomos/util/logger/Logger.hh"
 #include "Node.hh"
 
 namespace Tomos
 {
-
     class ECS
     {
     public:
@@ -20,15 +19,15 @@ namespace Tomos
             systems[typeid( T )] = std::make_unique<T>();
         }
 
-        void registerComponent( const std::shared_ptr<Component>& component, const std::shared_ptr<Node>& node );
-        void destroyComponent( const std::shared_ptr<Component>& component, const std::shared_ptr<Node>& node );
+        void registerComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node );
+        void destroyComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node );
 
         void earlyUpdate();
         void update();
         void lateUpdate();
 
         template<typename T>
-        System& getSystem()
+        T& getSystem()
         {
             std::type_index type = typeid( T );
 
@@ -36,12 +35,10 @@ namespace Tomos
             {
                 LOG_ERROR() << "System not found: " << type.name();
             }
-            return *systems[type];
+            return *static_cast<T*>( systems[type].get() );
         }
-
 
     private:
         std::unordered_map<std::type_index, std::unique_ptr<System>> systems;
     };
-
-}  // namespace Tomos
+} // namespace Tomos

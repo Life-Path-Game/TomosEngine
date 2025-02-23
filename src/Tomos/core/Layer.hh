@@ -3,45 +3,69 @@
 #include <memory>
 #include <string>
 
-#include "../events/Event.hh"
+#include "Scene.hh"
+#include "Tomos/events/Event.hh"
 
 namespace Tomos
 {
-
     class Layer
     {
     public:
-        explicit Layer( const std::string& name = "Layer" ) : name( name ) {}
-        virtual ~Layer();
+        explicit Layer( const std::string& p_name = "Layer" ) :
+            m_name( p_name )
+        {
+        }
 
-        virtual void onAttach() {}
-        virtual void onDetach() {}
-        virtual void onUpdate() {}
-        virtual void onEvent( Event& event ) {}
+        virtual ~Layer() = default;
 
-        inline const std::string& getName() const { return name; }
+        virtual void onAttach()
+        {
+        }
+
+        virtual void onDetach()
+        {
+        }
+
+        virtual void onUpdate()
+        {
+            if ( m_sceneManager.activeScene() )
+            {
+                m_sceneManager.activeScene()->update();
+            }
+        }
+
+        virtual void onEvent( Event& p_event )
+        {
+        }
+
+        inline const std::string& getName() const { return m_name; }
+
+        inline SceneManager& getSceneManager() { return m_sceneManager; }
 
     protected:
-        std::string name;
+        std::string m_name{};
+
+        SceneManager m_sceneManager;
     };
 
+    // She stack on my layer till i Vector
     class LayerStack
     {
     public:
         LayerStack();
         ~LayerStack();
 
-        void pushLayer( std::unique_ptr<Layer> layer );
-        void pushOverlay( std::unique_ptr<Layer> overlay );
-        void popLayer( std::unique_ptr<Layer> layer );
-        void popOverlay( std::unique_ptr<Layer> overlay );
+        void        pushLayer( Layer* p_layer );
+        void        pushOverlay( Layer* p_overlay );
+        void popLayer( Layer* p_layer );
+        void popOverlay( Layer* p_overlay );
 
-        std::vector<std::unique_ptr<Layer>>::iterator begin() { return layers.begin(); }
-        std::vector<std::unique_ptr<Layer>>::iterator end() { return layers.end(); }
+        std::vector<Layer*>::iterator begin() { return m_layers.begin(); }
+        std::vector<Layer*>::iterator end() { return m_layers.end(); }
 
     private:
-        std::vector<std::unique_ptr<Layer>>           layers;
-        std::vector<std::unique_ptr<Layer>>::iterator layerInsert;
+        // Don't care, Raw Pointer
+        std::vector<Layer*>           m_layers;
+        std::vector<Layer*>::iterator m_layerInsert;
     };
-
-}  // namespace Tomos
+} // namespace Tomos
