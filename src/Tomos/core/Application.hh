@@ -1,5 +1,4 @@
 #pragma once
-
 #include <memory>
 
 #include "Tomos/util/input/Input.hh"
@@ -13,17 +12,23 @@ namespace Tomos
     class WindowCloseEvent;
     class Application;
 
-    class State
+    struct State
     {
         friend class Application;
 
-    public:
+        State()
+        {
+            LOG_WARN() << "State constructor";
+        }
+
         ECS        m_ecs;
         LayerStack m_layerStack;
         Input      m_input;
         Time       m_time;
 
-        float m_aspectRatio = 1;
+        float m_aspectRatio = 16.0f / 9.0f;
+        int   m_width       = 1280;
+        int   m_height      = 720;
     };
 
     class Application
@@ -38,7 +43,7 @@ namespace Tomos
 
         Window& getWindow() const;
 
-        State& getState() { return m_state; }
+        static State& getState() { return get()->m_state; }
 
         void PushLayer( Layer* p_layer );
         void PushOverlay( Layer* p_overlay );

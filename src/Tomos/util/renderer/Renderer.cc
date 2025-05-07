@@ -16,11 +16,23 @@ namespace Tomos
         glClear( p_mask );
     }
 
+    void Renderer::onWindowResize( unsigned int p_width, unsigned int p_height )
+    {
+        // glViewport( 0, 0, p_width, p_height );
+    }
+
     void Renderer::beginScene()
     {
     }
 
     void Renderer::endScene()
+    {
+    }
+
+    void Renderer::submit( const std::shared_ptr<Shader>&      p_shader,
+                           const std::shared_ptr<VertexArray>& p_vertexArray,
+                           const glm::mat4&                    p_transform,
+                           const glm::mat4&                    p_viewProjection )
     {
     }
 
@@ -30,8 +42,8 @@ namespace Tomos
                          const glm::mat4&                    p_viewProjection )
     {
         p_shader->bind();
-        p_shader->setMat4( "transform", p_transform );
-        p_shader->setMat4( "viewProjection", p_viewProjection );
+        p_shader->setMat4( "uTransform", p_transform );
+        p_shader->setMat4( "uViewProjection", p_viewProjection );
 
         p_vertexArray->bind();
         glDrawElements( GL_TRIANGLES, p_vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr );

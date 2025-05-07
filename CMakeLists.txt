@@ -7,19 +7,18 @@ find_package(glm 1.0 CONFIG REQUIRED)
 find_package(glfw3 3.4 REQUIRED)
 find_package(GLEW 2.1 REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(assimp 5.0 REQUIRED)
+find_package(Jolt REQUIRED)
 
 # Gather all .cc files recursively
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
 )
 
 # Gather all header directories for include paths
 file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hh
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hh
 )
-# Gather all resources
-set(RESOURCE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Tomos/resource)
-set(RESOURCE_DEST_DIR ${CMAKE_BINARY_DIR}/resource)
 
 add_library(${PROJECT_NAME} STATIC
         src/Tomos/util/logger/Logger.cc
@@ -40,8 +39,7 @@ add_library(${PROJECT_NAME} STATIC
         src/Tomos/util/renderer/Shader.hh
         src/Tomos/core/Node.cc
         src/Tomos/core/Node.hh
-        src/Tomos/lib/stb_image/stb_image.cc
-        src/Tomos/lib/stb_image/stb_image.h
+        src/Tomos/lib/stb_image.h
         src/Tomos/core/Ecs.cc
         src/Tomos/core/Ecs.hh
         src/Tomos/systems/System.hh
@@ -66,25 +64,84 @@ add_library(${PROJECT_NAME} STATIC
         src/Tomos/util/renderer/Renderer.hh
         src/Tomos/util/time/Time.cc
         src/Tomos/util/time/Time.hh
+        src/Tomos/util/resourceManager/ResourceManager.hh
+        src/Tomos/systems/script/ScriptSystem.cc
+        src/Tomos/systems/script/ScriptSystem.hh
+        src/Tomos/systems/script/ScriptComponent.hh
+        src/Tomos/lib/lib.cc
+        src/Tomos/lib/json.hpp
+        src/Tomos/systems/mesh/MeshComponent.hh
+        src/Tomos/systems/mesh/Mesh.hh
+        src/Tomos/systems/mesh/Mesh.cc
+        src/Tomos/systems/mesh/MeshSystem.cc
+        src/Tomos/systems/mesh/MeshSystem.hh
+        src/Tomos/util/gltfLoader/GLBLoader.cc
+        src/Tomos/util/gltfLoader/GLBLoader.hh
+        src/Tomos/systems/mesh/Material.cc
+        src/Tomos/systems/mesh/Material.hh
+        src/Tomos/util/renderer/Texture.cc
+        src/Tomos/util/renderer/Texture.hh
+        src/Tomos/util/renderer/Sampler.cc
+        src/Tomos/util/renderer/Sampler.hh
+        src/Tomos/systems/physics/PhysicsSystem.cc
+        src/Tomos/systems/physics/PhysicsSystem.hh
 )
 
-# Copy shaders to build directory
-if(EXISTS ${RESOURCE_SOURCE_DIR})
-add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${RESOURCE_DEST_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${RESOURCE_SOURCE_DIR} ${RESOURCE_DEST_DIR}
-    COMMENT "Copying resources to output directory..."
-)
-endif()
+# Set absolute paths for source and destination directories
+set(RESOURCE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/Tomos/resources")
+set(RESOURCE_DEST_DIR "${CMAKE_BINARY_DIR}/resources")
+
+# Always create the destination directory at configure time
+file(MAKE_DIRECTORY "${RESOURCE_DEST_DIR}")
+
+if (EXISTS "${RESOURCE_SOURCE_DIR}")
+    # Use file(GLOB_RECURSE) with absolute paths
+    file(GLOB_RECURSE RESOURCE_FILES
+            LIST_DIRECTORIES false
+            RELATIVE "${RESOURCE_SOURCE_DIR}"
+            "${RESOURCE_SOURCE_DIR}/*")
+
+    # Debug output to verify found files
+    message(STATUS "Found ${RESOURCE_FILES} resource files to copy")
+
+    # Create a custom target for resource copying
+    add_custom_target(CopyResources ALL
+            COMMENT "Preparing to copy resources..."
+    )
+
+    # Add copy commands for each file
+    foreach (RESOURCE_FILE ${RESOURCE_FILES})
+        # Get relative directory path
+        get_filename_component(RESOURCE_DIR "${RESOURCE_FILE}" DIRECTORY)
+
+        # Create the copy command
+        add_custom_command(
+                TARGET CopyResources
+                COMMAND ${CMAKE_COMMAND} -E make_directory "${RESOURCE_DEST_DIR}/${RESOURCE_DIR}"
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${RESOURCE_SOURCE_DIR}/${RESOURCE_FILE}"
+                "${RESOURCE_DEST_DIR}/${RESOURCE_FILE}"
+                COMMENT "Copying ${RESOURCE_FILE}..."
+                VERBATIM
+        )
+    endforeach ()
+
+    # Make main project depend on resource copying
+    add_dependencies(${PROJECT_NAME} CopyResources)
+
+    # Install step (optional)
+    install(DIRECTORY "${RESOURCE_SOURCE_DIR}/" DESTINATION "${CMAKE_INSTALL_PREFIX}/resources")
+else ()
+    message(WARNING "Resource directory not found: ${RESOURCE_SOURCE_DIR}")
+endif ()
 
 # Automatically include all directories with headers
 target_include_directories(${PROJECT_NAME} PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-DNDEBUG)
 endif ()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm glfw GLEW::GLEW OpenGL::GL)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm glfw GLEW::GLEW OpenGL::GL assimp::assimp Jolt::Jolt)

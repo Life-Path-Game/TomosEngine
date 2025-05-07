@@ -50,6 +50,8 @@ namespace Tomos
             getState().m_ecs.earlyUpdate();
             getState().m_ecs.update();
 
+            getState().m_ecs.updateFixedTimeStep( getState().m_time.deltaTime() );
+
             for ( auto& layer : getState().m_layerStack )
             {
                 layer->onUpdate();
@@ -71,6 +73,15 @@ namespace Tomos
         dispatcher.dispatch<WindowCloseEvent>( [this]( Event& p_event )
         {
             return onWindowClose( dynamic_cast<WindowCloseEvent&>( p_event ) );
+        } );
+
+        dispatcher.dispatch<WindowResizeEvent>( [this]( Event& p_event )
+        {
+            auto& e = dynamic_cast<WindowResizeEvent&>( p_event );
+            // getState().m_aspectRatio = ( float ) e.getWidth() / ( float ) e.getHeight();
+            getState().m_width  = e.getWidth();
+            getState().m_height = e.getHeight();
+            return false;
         } );
 
         for ( auto it = getState().m_layerStack.end(); it != getState().m_layerStack.begin(); )

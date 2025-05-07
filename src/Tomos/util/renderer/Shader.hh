@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <string>
 
+#include "Tomos/util/resourceManager/ResourceManager.hh"
+
 
 namespace Tomos
 {
@@ -10,6 +12,7 @@ namespace Tomos
     {
     public:
         unsigned int m_rendererId;
+        unsigned int m_resourceId = ResourceManager::getNewResourceId();
 
         Shader( const std::string& p_vertexPath, const std::string& p_fragmentPath );
         ~Shader();

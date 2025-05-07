@@ -10,7 +10,7 @@ namespace Tomos
     {
         LOG_DEBUG() << "Start";
         auto t = typeid( *p_component ).hash_code();
-        for ( auto& [_, system] : systems )
+        for ( auto& [_, system] : m_systems )
         {
             if ( system->getComponentType().hash_code() == t )
             {
@@ -19,6 +19,17 @@ namespace Tomos
                 return;
             }
         }
+
+        for ( auto& [_, system] : m_fixedTimeStepSystems )
+        {
+            if ( system->getComponentType().hash_code() == t )
+            {
+                system->componentAdded( p_component, p_node );
+                LOG_DEBUG() << "End";
+                return;
+            }
+        }
+
         LOG_WARN() << "No system found for component: " << p_component->m_name;
     }
 
@@ -26,7 +37,7 @@ namespace Tomos
     {
         LOG_DEBUG() << "Start";
         auto t = typeid( *p_component ).hash_code();
-        for ( auto& [_, system] : systems )
+        for ( auto& [_, system] : m_systems )
         {
             if ( system->getComponentType().hash_code() == t )
             {
@@ -35,13 +46,24 @@ namespace Tomos
                 return;
             }
         }
+
+        for ( auto& [_, system] : m_fixedTimeStepSystems )
+        {
+            if ( system->getComponentType().hash_code() == t )
+            {
+                system->componentRemoved( p_component, p_node );
+                LOG_DEBUG() << "End";
+                return;
+            }
+        }
+
         LOG_WARN() << "No system found for component: " << p_component->m_name;
     }
 
 
     void ECS::earlyUpdate()
     {
-        for ( auto& [_, system] : systems )
+        for ( auto& [_, system] : m_systems )
         {
             system->earlyUpdate();
         }
@@ -49,7 +71,7 @@ namespace Tomos
 
     void ECS::update()
     {
-        for ( auto& [_, system] : systems )
+        for ( auto& [_, system] : m_systems )
         {
             system->update();
         }
@@ -57,9 +79,17 @@ namespace Tomos
 
     void ECS::lateUpdate()
     {
-        for ( auto& [_, system] : systems )
+        for ( auto& [_, system] : m_systems )
         {
             system->lateUpdate();
+        }
+    }
+
+    void ECS::updateFixedTimeStep( float p_deltaTime )
+    {
+        for ( auto& [_, system] : m_fixedTimeStepSystems )
+        {
+            system->update( p_deltaTime );
         }
     }
 } // namespace Tomos

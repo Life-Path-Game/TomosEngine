@@ -8,39 +8,39 @@
 
 namespace Tomos
 {
-    void CameraSystem::componentAdded( std::shared_ptr<Component> component, std::shared_ptr<Node> node )
+    void CameraSystem::componentAdded( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
     {
-        if ( !components.erase( component ) )
+        if ( !m_components.erase( p_component ) )
         {
-            LOG_WARN() << "Component moved to new node";
+            LOG_WARN() << "Component moved to new node: " << p_component->m_name;
         }
-        components[component] = node;
+        m_components[p_component] = p_node;
     }
 
-    void CameraSystem::componentRemoved( std::shared_ptr<Component> component, std::shared_ptr<Node> node )
+    void CameraSystem::componentRemoved( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
     {
-        components.erase( component );
+        m_components.erase( p_component );
     }
 
 
     void CameraSystem::lateUpdate()
     {
-        auto cam = std::find_if( components.begin(), components.end(),
-                                 []( std::pair<std::shared_ptr<Component>, std::shared_ptr<Node>> pair )
+        auto cam = std::find_if( m_components.begin(), m_components.end(),
+                                 []( std::pair<std::shared_ptr<Component>, std::shared_ptr<Node>> p_pair )
                                  {
-                                     auto c = std::dynamic_pointer_cast<CameraComponent>( pair.first );
-                                     return ( c && c->m_active && pair.second->isActive() );
+                                     auto c = std::dynamic_pointer_cast<CameraComponent>( p_pair.first );
+                                     return ( c && c->m_active && p_pair.second->isActive() );
                                  } );
 
-        if ( cam == components.end() )
+        if ( cam == m_components.end() )
         {
             LOG_WARN() << "No active camera found";
             return;
         }
 
-        auto cc        = std::dynamic_pointer_cast<CameraComponent>( cam->first );
+        const auto cc  = std::dynamic_pointer_cast<CameraComponent>( cam->first );
         m_activeCamera = cc;
-        auto tc        = cam->second->m_transform;
+        const auto tc  = cam->second->m_transform;
 
         m_viewMat = tc.m_globInvMat;
 
@@ -56,8 +56,8 @@ namespace Tomos
         auto c = std::dynamic_pointer_cast<Component>( m_activeCamera );
         if ( c )
         {
-            auto n = components.find( c );
-            if ( n != components.end() )
+            auto n = m_components.find( c );
+            if ( n != m_components.end() )
             {
                 return n->second;
             }

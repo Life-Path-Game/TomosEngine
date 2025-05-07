@@ -46,14 +46,14 @@ namespace Tomos
     {
         if ( !isInScene() )
         {
-            Application::get()->getState().m_ecs.registerComponent( p_component, shared_from_this() );
+            Application::getState().m_ecs.registerComponent( p_component, shared_from_this() );
         }
         this->m_components.push_back( p_component );
     }
 
     void Node::removeComponent( const std::shared_ptr<Component>& p_component )
     {
-        Application::get()->getState().m_ecs.destroyComponent( p_component, shared_from_this() );
+        Application::getState().m_ecs.destroyComponent( p_component, shared_from_this() );
         auto it = std::find( m_components.begin(), m_components.end(), p_component );
         if ( it != m_components.end() )
         {

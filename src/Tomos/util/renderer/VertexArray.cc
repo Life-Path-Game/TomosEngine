@@ -29,12 +29,12 @@ namespace Tomos
         bind();
         p_vertexBuffer->bind();
 
-        unsigned int attribIndex = 0;
+        unsigned int attribIndex = calculateAtributeIndex();
         auto         l           = p_vertexBuffer->getLayout();
         LOG_DEBUG() << "Binding vertex buffer";
         for ( const auto& element : l )
         {
-            LOG_DEBUG() << "Element: " << element.m_name << " Offset: " << element.m_offset << " Size: " << element.m_size;
+            LOG_DEBUG() << "Element: " << element.m_name << " Offset: " << element.m_offset << " Size: " << element.m_size << " Index: " << attribIndex;
             glEnableVertexAttribArray( attribIndex );
             glVertexAttribPointer( attribIndex
                                    , element.getComponentCount()
@@ -57,6 +57,16 @@ namespace Tomos
         p_indexBuffer->bind();
 
         m_indexBuffer = p_indexBuffer;
+    }
+
+    unsigned int VertexArray::calculateAtributeIndex() const
+    {
+        unsigned int index = 0;
+        for ( const auto& buffer : m_vertexBuffers )
+        {
+            index += buffer->getLayout().getElements().size();
+        }
+        return index;
     }
 
     VertexArray::VertexArray()

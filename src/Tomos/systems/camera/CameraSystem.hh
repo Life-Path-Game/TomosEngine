@@ -10,8 +10,8 @@ namespace Tomos
     class CameraSystem : public System
     {
     public:
-        void componentAdded( std::shared_ptr<Component> p_component, std::shared_ptr<Node> p_node ) override;
-        void componentRemoved( std::shared_ptr<Component> p_component, std::shared_ptr<Node> p_node ) override;
+        void componentAdded( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node ) override;
+        void componentRemoved( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node ) override;
 
         void lateUpdate() override;
 
@@ -20,10 +20,10 @@ namespace Tomos
         std::shared_ptr<Node> getActiveCameraNode() const;
 
         const std::shared_ptr<CameraComponent>& getActiveCamera() const;
-        const glm::mat4& getViewProjectionMat() const;
-        const glm::mat4& getViewProjectionInvMat() const;
-        const glm::mat4& getViewMat() const;
-        const glm::mat4& getViewInvMat() const;
+        const glm::mat4&                        getViewProjectionMat() const;
+        const glm::mat4&                        getViewProjectionInvMat() const;
+        const glm::mat4&                        getViewMat() const;
+        const glm::mat4&                        getViewInvMat() const;
 
     private:
         std::shared_ptr<CameraComponent> m_activeCamera;

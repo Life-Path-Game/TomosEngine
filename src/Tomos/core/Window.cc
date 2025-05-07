@@ -34,7 +34,7 @@ namespace Tomos
         glfwSetWindowUserPointer( m_window, &m_data );
 
         glewExperimental = GL_TRUE;
-        if ( glewInit() != GLEW_OK )
+        if ( glewInit() != ( GLEW_OK | GLEW_ERROR_NO_GLX_DISPLAY ) )
         {
             LOG_ERROR() << "Failed to initialize GLEW!";
             exit( EXIT_FAILURE );

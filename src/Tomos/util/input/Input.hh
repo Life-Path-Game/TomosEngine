@@ -9,12 +9,17 @@ namespace Tomos
     class Input
     {
     public:
-        static bool isKeyDown( int p_keycode );
+        bool isKeyDown( int p_keycode );
 
-        static bool   isMouseDown( int p_button );
-        static double getMouseX();
-        static double getMouseY();
-        static std::pair<double, double> getMousePos();
+        bool   isMouseDown( int p_button );
+        double getMouseX();
+        double getMouseY();
+        std::pair<double, double> getMousePos();
+        std::pair<double, double> getMouseDelta();
+
+    private:
+        bool m_firstMouseMove = true;
+        std::pair<double, double> m_mousePosOld;
     };
 
 }  // namespace Tomos
