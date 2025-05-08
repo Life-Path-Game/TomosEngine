@@ -18,9 +18,11 @@ namespace Tomos
         m_stride            = 0;
         for ( auto& element : m_elements )
         {
-            element.m_offset = offset;
-            offset += shaderDataTypeSize( element.m_type );
-            m_stride += element.m_size;
+            element.m_offset  = offset;
+            unsigned int size = shaderDataTypeSize( element.m_type );
+            offset += size;
+            m_stride += size;
+            element.m_size = size;
 
             LOG_DEBUG() << "Element: " << element.m_name << " Offset: " << element.m_offset << " Size: " << element.m_size;
         }

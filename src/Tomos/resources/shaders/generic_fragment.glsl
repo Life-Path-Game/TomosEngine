@@ -19,16 +19,21 @@ out vec4 FragColor;
 
 void main()
 {
-    vec4 baseColor = texture(uBaseTexture, vTexCoord) * uBaseFactor;
-    vec3 normal = normalize(vNormal);
+    // Sample textures
+    vec4 baseColor = texture(uBaseTexture, vTexCoord);
+    vec4 metalRoughColor = texture(uMetalRoughTexture, vTexCoord);
+    vec3 normalColor = texture(uNormalTexture, vTexCoord).xyz * 2.0 - 1.0;
 
-    // Simple directional light
-    vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = diff * baseColor.rgb;
+    // Apply material properties
+    vec3 normal = normalize(vNormal + normalColor * uNormalScale);
+    float metallic = metalRoughColor.r * uMetalFactor;
+    float roughness = metalRoughColor.g * uRoughFactor;
 
-    // Combine with emission
-    vec3 result = diffuse + uEmissionFactor;
+    // Calculate final color
+    FragColor = baseColor * uBaseFactor;
+    FragColor.rgb += uEmissionFactor;
 
-    FragColor = baseColor;
+    // Alpha cutoff
+    if (FragColor.a < uAlphaCutoff)
+        discard;
 }

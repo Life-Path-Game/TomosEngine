@@ -37,10 +37,8 @@ namespace Tomos
 
             if ( mesh && material )
             {
-                // Bind the material
                 material->bind();
 
-                // Draw the mesh
                 Renderer::draw( meshComponent->getMesh()->getShader(),
                                 mesh->getVertexArray(),
                                 node->m_transform.m_globMat,

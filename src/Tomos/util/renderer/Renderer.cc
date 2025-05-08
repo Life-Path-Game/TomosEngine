@@ -4,6 +4,8 @@
 
 #include "Renderer.hh"
 
+#include "Tomos/util/logger/Logger.hh"
+
 namespace Tomos
 {
     void Renderer::setClearedColor( const glm::vec4& p_color )
@@ -41,11 +43,30 @@ namespace Tomos
                          const glm::mat4&                    p_transform,
                          const glm::mat4&                    p_viewProjection )
     {
+        if ( !p_vertexArray || !p_vertexArray->getIndexBuffer() )
+        {
+            LOG_ERROR() << "Renderer::draw() - Invalid VertexArray or IndexBuffer";
+            return;
+        }
+
         p_shader->bind();
         p_shader->setMat4( "uTransform", p_transform );
         p_shader->setMat4( "uViewProjection", p_viewProjection );
 
         p_vertexArray->bind();
-        glDrawElements( GL_TRIANGLES, p_vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr );
+
+        GLenum indexType = GL_UNSIGNED_INT; // default
+
+        glDrawElements( GL_TRIANGLES,
+                        p_vertexArray->getIndexBuffer()->getCount(),
+                        indexType,
+                        nullptr );
+
+        // Check for OpenGL errors
+        GLenum err;
+        while ( ( err = glGetError() ) != GL_NO_ERROR )
+        {
+            LOG_ERROR() << "OpenGL error in Renderer::draw(): " << err;
+        }
     }
 } // namespace Tomos

@@ -67,10 +67,16 @@ namespace Tomos
 #define LOG_INFO() Tomos::Logger::log( Tomos::LogLevel::INFO )
 #define LOG_WARN() Tomos::Logger::log( Tomos::LogLevel::WARN )
 #define LOG_ERROR() Tomos::Logger::log( Tomos::LogLevel::ERROR )
+#define LOG_ASSERT_MSG( p_expression, p_message )  \
+    if ( !( p_expression ) )        \
+    {                               \
+        LOG_ERROR() << p_message;   \
+        assert( p_expression );     \
+    }
 #define LOG_ASSERT( p_expression )  \
     if ( !( p_expression ) )        \
     {                               \
-        std::cout << "\n";          \
+        LOG_ERROR() << "Assertion failed"; \
         assert( p_expression );     \
     }
 

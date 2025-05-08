@@ -7,8 +7,7 @@ find_package(glm 1.0 CONFIG REQUIRED)
 find_package(glfw3 3.4 REQUIRED)
 find_package(GLEW 2.1 REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(assimp 5.0 REQUIRED)
-find_package(Jolt REQUIRED)
+#find_package(Jolt REQUIRED)
 
 # Gather all .cc files recursively
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
@@ -144,4 +143,4 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-DNDEBUG)
 endif ()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm glfw GLEW::GLEW OpenGL::GL assimp::assimp Jolt::Jolt)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm glfw GLEW::GLEW OpenGL::GL)

@@ -31,45 +31,48 @@ namespace Tomos
 
     void Mesh::setupVertexAttributes() const
     {
-        // all of these are required - unlucky
-
-        // Position (location = 0)
         if ( !m_position )
         {
             LOG_ERROR() << "Mesh requires a position buffer";
             return;
         }
+
+        // Position (location = 0)
         BufferLayout positionLayout = {
                 {ShaderDataType::Float3, "aPosition"}
         };
         m_position->setLayout( positionLayout );
         m_vertexArray->addVertexBuffer( m_position );
 
-        // Normal (location = 1)
-        if ( !m_normal )
+        // Normal (location = 1) - make optional
+        if ( m_normal )
         {
-            LOG_ERROR() << "Mesh requires a normal buffer";
-            return;
+            BufferLayout normalLayout = {
+                    {ShaderDataType::Float3, "aNormal"}
+            };
+            m_normal->setLayout( normalLayout );
+            m_vertexArray->addVertexBuffer( m_normal );
         }
-        BufferLayout normalLayout = {
-                {ShaderDataType::Float3, "aNormal"}
-        };
-        m_normal->setLayout( normalLayout );
-        m_vertexArray->addVertexBuffer( m_normal );
-
-        // Texture Coordinates (location = 2)
-        if ( !m_texCoord )
+        else
         {
-            LOG_ERROR() << "Mesh requires a texture coordinate buffer";
-            return;
+            LOG_WARN() << "Mesh has no normal buffer - using default";
         }
-        BufferLayout texCoordLayout = {
-                {ShaderDataType::Float2, "aTexCoord"}
-        };
-        m_texCoord->setLayout( texCoordLayout );
-        m_vertexArray->addVertexBuffer( m_texCoord );
 
-        // Tangent (location = 3) - if present
+        // Texture Coordinates (location = 2) - make optional
+        if ( m_texCoord )
+        {
+            BufferLayout texCoordLayout = {
+                    {ShaderDataType::Float2, "aTexCoord"}
+            };
+            m_texCoord->setLayout( texCoordLayout );
+            m_vertexArray->addVertexBuffer( m_texCoord );
+        }
+        else
+        {
+            LOG_WARN() << "Mesh has no texture coordinate buffer - using default";
+        }
+
+        // Tangent (location = 3) - optional
         if ( m_tangent )
         {
             BufferLayout tangentLayout = {

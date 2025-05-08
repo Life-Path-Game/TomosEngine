@@ -13,7 +13,10 @@ namespace Tomos
     {
     }
 
-    void Node::addChild( const std::shared_ptr<Node>& p_child ) { this->m_children.emplace( p_child ); }
+    void Node::addChild( const std::shared_ptr<Node>& p_child )
+    {
+        this->m_children.emplace( p_child );
+    }
 
     bool Node::removeChild( const std::shared_ptr<Node>& p_child ) { return this->m_children.erase( p_child ) > 0; }
 

@@ -61,6 +61,7 @@ namespace Tomos
 
 
             m_window->onUpdate();
+            return;
         }
         LOG_DEBUG() << "End";
     }
