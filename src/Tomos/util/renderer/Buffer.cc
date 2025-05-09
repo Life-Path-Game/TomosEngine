@@ -58,8 +58,13 @@ namespace Tomos
     IndexBuffer::IndexBuffer( const unsigned int* p_indicies, unsigned int p_count )
     {
         glCreateBuffers( 1, &m_rendererId );
-        bind();
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER, p_count * sizeof( unsigned int ), p_indicies, GL_STATIC_DRAW );
+        // Umm this is real because OpenGL is stupid L
+        // I hate state machines
+        // I hate state machines
+        // I hate state machines
+        // I hate state machines
+        glBindBuffer( GL_ARRAY_BUFFER, m_rendererId );
+        glBufferData( GL_ARRAY_BUFFER, p_count * sizeof( unsigned int ), p_indicies, GL_STATIC_DRAW );
         m_count = p_count;
     }
 

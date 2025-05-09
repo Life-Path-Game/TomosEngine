@@ -15,7 +15,7 @@ namespace Tomos
         auto meshComponent = std::dynamic_pointer_cast<MeshComponent>( p_component );
         if ( !m_components.erase( p_component ) )
         {
-            LOG_WARN() << "Component moved to new node: " << p_component->m_name;
+            LOG_DEBUG() << "Component moved to new node: " << p_component->m_name;
         }
         m_components[p_component] = p_node;
     }

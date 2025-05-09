@@ -28,6 +28,8 @@ namespace Tomos
         void addComponent( const std::shared_ptr<Component>& p_component );
         void removeComponent( const std::shared_ptr<Component>& p_component );
 
+        const std::vector<std::shared_ptr<Component>>& getComponents() const { return m_components; }
+
         bool isInScene() const;
 
         void destroy();
@@ -55,7 +57,7 @@ namespace Tomos
         std::set<std::shared_ptr<Node>>         m_children;
         std::vector<std::shared_ptr<Component>> m_components;
 
-        bool m_active = true;
+        bool m_active = false;
     };
 
     static void updateTransforms( Node* node )

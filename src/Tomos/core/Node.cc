@@ -16,9 +16,14 @@ namespace Tomos
     void Node::addChild( const std::shared_ptr<Node>& p_child )
     {
         this->m_children.emplace( p_child );
+        p_child->setActive( true );
     }
 
-    bool Node::removeChild( const std::shared_ptr<Node>& p_child ) { return this->m_children.erase( p_child ) > 0; }
+    bool Node::removeChild( const std::shared_ptr<Node>& p_child )
+    {
+        p_child->setActive( false );
+        return this->m_children.erase( p_child ) > 0;
+    }
 
     void Node::traverse( const std::function<void( Node& )>& p_before, const std::function<void( Node& )>& p_after )
     {

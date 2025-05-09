@@ -25,8 +25,8 @@ namespace Tomos
             exit( EXIT_FAILURE );
         }
 
-        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
-        glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+        glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 0 );
         glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
         m_window = glfwCreateWindow( m_data.m_width, m_data.m_height, m_data.m_title.c_str(), nullptr, nullptr );
@@ -34,9 +34,10 @@ namespace Tomos
         glfwSetWindowUserPointer( m_window, &m_data );
 
         glewExperimental = GL_TRUE;
-        if ( glewInit() != ( GLEW_OK | GLEW_ERROR_NO_GLX_DISPLAY ) )
+        auto res         = glewInit();
+        if ( res != GLEW_OK && res != GLEW_ERROR_NO_GLX_DISPLAY )
         {
-            LOG_ERROR() << "Failed to initialize GLEW!";
+            LOG_ERROR() << "Failed to initialize GLEW: " << glewGetErrorString( res );
             exit( EXIT_FAILURE );
         }
 
@@ -143,7 +144,6 @@ namespace Tomos
         glfwDestroyWindow( m_window );
         glfwTerminate();
     }
-
 
     void Window::onUpdate()
     {

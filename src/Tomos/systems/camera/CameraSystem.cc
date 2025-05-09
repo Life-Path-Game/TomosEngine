@@ -12,7 +12,7 @@ namespace Tomos
     {
         if ( !m_components.erase( p_component ) )
         {
-            LOG_WARN() << "Component moved to new node: " << p_component->m_name;
+            LOG_DEBUG() << "Component moved to new node: " << p_component->m_name;
         }
         m_components[p_component] = p_node;
     }
@@ -21,7 +21,6 @@ namespace Tomos
     {
         m_components.erase( p_component );
     }
-
 
     void CameraSystem::lateUpdate()
     {
