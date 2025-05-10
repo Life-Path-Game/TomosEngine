@@ -13,9 +13,11 @@ namespace Tomos
 {
     Window::Window( const WindowProps& p_props )
     {
-        m_data.m_title  = p_props.m_title;
-        m_data.m_width  = p_props.m_width;
-        m_data.m_height = p_props.m_height;
+        m_data.m_title       = p_props.m_title;
+        m_data.m_width       = p_props.m_width;
+        m_data.m_height      = p_props.m_height;
+        m_data.m_vsync       = p_props.m_vsync;
+        m_data.m_aspectRatio = p_props.m_aspectRatio;
 
         LOG_INFO() << "Creating m_window " << m_data.m_title << " (" << m_data.m_width << ", " << m_data.m_height << ")";
 
@@ -26,7 +28,7 @@ namespace Tomos
         }
 
         glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
-        glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 0 );
+        glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 1 );
         glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
         m_window = glfwCreateWindow( m_data.m_width, m_data.m_height, m_data.m_title.c_str(), nullptr, nullptr );
@@ -43,10 +45,7 @@ namespace Tomos
 
         LOG_INFO() << "OpenGL Version: " << glGetString( GL_VERSION );
 
-        glfwSetErrorCallback( []( int p_error, const char* p_description )
-        {
-            LOG_ERROR() << "GLFW Error (" << p_error << "): " << p_description;
-        } );
+        glfwSetErrorCallback( []( int p_error, const char* p_description ) { LOG_ERROR() << "GLFW Error (" << p_error << "): " << p_description; } );
 
         glfwSetWindowSizeCallback( m_window,
                                    []( GLFWwindow* p_window, int p_width, int p_height )
@@ -151,11 +150,7 @@ namespace Tomos
         glfwSwapBuffers( m_window );
     }
 
-    unsigned int Window::getWidth() const { return m_data.m_width; }
-
-    unsigned int Window::getHeight() const { return m_data.m_height; }
-
     void Window::setEventCallback( const EventCallback& p_callback ) { m_data.m_eventCallback = p_callback; }
 
     GLFWwindow* Window::getNativeWindow() const { return m_window; }
-} // namespace Tomos
+}  // namespace Tomos

@@ -34,6 +34,6 @@ void main()
     FragColor.rgb += uEmissionFactor;
 
     // Alpha cutoff
-    if (FragColor.a < uAlphaCutoff)
+    if (baseColor.a < uAlphaCutoff)
         discard;
 }

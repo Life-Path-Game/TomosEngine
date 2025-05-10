@@ -8,31 +8,34 @@
 
 namespace Tomos
 {
-    LayerStack::LayerStack() { m_layerInsert = m_layers.begin(); }
+    LayerStack::LayerStack() {}
 
     LayerStack::~LayerStack()
     {
         for ( Layer* layer : m_layers )
         {
+            layer->onDetach();
             delete layer;
         }
     }
 
     void LayerStack::pushLayer( Layer* p_layer )
     {
-        m_layerInsert = m_layers.insert( m_layerInsert, p_layer );
+        m_layers.emplace( m_layers.begin() + m_layerInsertIndex, p_layer );
+        m_layerInsertIndex++;
     }
 
-    void LayerStack::pushOverlay( Layer* p_overlay ) { m_layers.push_back( p_overlay ); }
+    void LayerStack::pushOverlay( Layer* p_overlay ) { m_layers.emplace_back( p_overlay ); }
 
     void LayerStack::popLayer( Layer* p_layer )
     {
         LOG_DEBUG() << "Start";
-        auto it = std::find( m_layers.begin(), m_layers.end(), p_layer );
-        if ( it != m_layers.end() )
+        auto it = std::find( m_layers.begin(), m_layers.begin() + m_layerInsertIndex, p_layer );
+        if ( it != m_layers.begin() + m_layerInsertIndex )
         {
+            p_layer->onDetach();
             m_layers.erase( it );
-            m_layerInsert--;
+            m_layerInsertIndex--;
         }
         LOG_DEBUG() << "End";
     }
@@ -40,11 +43,12 @@ namespace Tomos
     void LayerStack::popOverlay( Layer* p_overlay )
     {
         LOG_DEBUG() << "Start";
-        auto it = std::find( m_layers.begin(), m_layers.end(), p_overlay );
+        auto it = std::find( m_layers.begin() + m_layerInsertIndex, m_layers.end(), p_overlay );
         if ( it != m_layers.end() )
         {
+            p_overlay->onDetach();
             m_layers.erase( it );
         }
         LOG_DEBUG() << "End";
     }
-} // namespace Tomos
+}  // namespace Tomos

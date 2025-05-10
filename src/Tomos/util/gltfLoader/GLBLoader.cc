@@ -2,6 +2,7 @@
 #define CGLTF_IMPLEMENTATION
 
 #include "GLBLoader.hh"
+
 #include <filesystem>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
@@ -16,42 +17,39 @@ namespace Tomos
     // Static cache instance
     inline GLBLoader::GLBResourceCache g_resourceCache;
 
-    GLBLoader::LoadResult GLBLoader::loadGLB( const std::string&             filepath,
-                                              const std::shared_ptr<Shader>& shader,
-                                              bool                           useCache )
+    GLBLoader::LoadResult GLBLoader::loadGLB( const std::string& p_filepath, const std::shared_ptr<Shader>& p_shader, bool p_useCache )
     {
         LoadResult result;
 
-        cgltf_options options      = {};
-        cgltf_data*   data         = nullptr;
-        cgltf_result  parse_result = cgltf_parse_file( &options, filepath.c_str(), &data );
+        cgltf_options options     = {};
+        cgltf_data*   data        = nullptr;
+        cgltf_result  parseResult = cgltf_parse_file( &options, p_filepath.c_str(), &data );
 
-        if ( parse_result != cgltf_result_success )
+        if ( parseResult != cgltf_result_success )
         {
-            LOG_ERROR() << "Failed to load GLB file: " << filepath << " Error: " << parse_result;
+            LOG_ERROR() << "Failed to load GLB file: " << p_filepath << " Error: " << parseResult;
             return result;
         }
 
         // Load buffers
-        cgltf_result load_result = cgltf_load_buffers( &options, data, filepath.c_str() );
-        if ( load_result != cgltf_result_success )
+        cgltf_result loadResult = cgltf_load_buffers( &options, data, p_filepath.c_str() );
+        if ( loadResult != cgltf_result_success )
         {
-            LOG_ERROR() << "Failed to load GLB buffers: " << filepath << " Error: " << load_result;
+            LOG_ERROR() << "Failed to load GLB buffers: " << p_filepath << " Error: " << loadResult;
             cgltf_free( data );
             return result;
         }
 
         // Create root node
-        auto rootNode = std::make_shared<Node>( "GLB_Root_" +
-                                                filepath.substr( filepath.find_last_of( "/\\" ) + 1 ) );
+        auto rootNode     = std::make_shared<Node>( "GLB_Root_" + p_filepath.substr( p_filepath.find_last_of( "/\\" ) + 1 ) );
         result.m_rootNode = rootNode;
 
         // Process all nodes recursively
         for ( size_t i = 0; i < data->nodes_count; i++ )
         {
-            if ( !data->nodes[i].parent ) // Only process root nodes, children will be processed recursively
+            if ( !data->nodes[i].parent )  // Only process root nodes, children will be processed recursively
             {
-                processNode( &data->nodes[i], data, rootNode, shader, result.m_materials, useCache );
+                processNode( &data->nodes[i], data, rootNode, p_shader, result.m_materials, p_useCache );
             }
         }
 
@@ -61,12 +59,12 @@ namespace Tomos
         return result;
     }
 
-    std::shared_ptr<Node> GLBLoader::createInstance( const std::shared_ptr<Node>& original )
+    std::shared_ptr<Node> GLBLoader::createInstance( const std::shared_ptr<Node>& p_original )
     {
-        if ( !original ) return nullptr;
+        if ( !p_original ) return nullptr;
 
         // Create a deep copy of the node hierarchy
-        return deepCopyNode( original );
+        return deepCopyNode( p_original );
     }
 
     std::shared_ptr<Node> GLBLoader::deepCopyNode( const std::shared_ptr<Node>& p_original )
@@ -80,10 +78,7 @@ namespace Tomos
         {
             if ( auto meshComp = std::dynamic_pointer_cast<MeshComponent>( component ) )
             {
-                auto newMeshComp = std::make_shared<MeshComponent>(
-                        meshComp->getMesh(),
-                        meshComp->getMaterial()
-                        );
+                auto newMeshComp = std::make_shared<MeshComponent>( meshComp->getMesh(), meshComp->getMaterial() );
                 copy->addComponent( newMeshComp );
             }
         }
@@ -97,11 +92,8 @@ namespace Tomos
         return copy;
     }
 
-    void GLBLoader::processNode( cgltf_node*                             p_node, cgltf_data* p_data,
-                                 const std::shared_ptr<Node>&            p_parentNode,
-                                 const std::shared_ptr<Shader>&          p_shader,
-                                 std::vector<std::shared_ptr<Material>>& p_materials,
-                                 bool                                    p_useCache )
+    void GLBLoader::processNode( cgltf_node* p_node, cgltf_data* p_data, const std::shared_ptr<Node>& p_parentNode, const std::shared_ptr<Shader>& p_shader,
+                                 std::vector<std::shared_ptr<Material>>& p_materials, bool p_useCache )
     {
         // Create a new node
         auto newNode = std::make_shared<SceneNode>( p_node->name ? p_node->name : "UnnamedNode" );
@@ -118,38 +110,29 @@ namespace Tomos
             glm::vec4 perspective;
             glm::decompose( matrix, scale, rotation, translation, skew, perspective );
 
-            newNode->m_transform.m_translation = translation;
-            newNode->m_transform.m_rotation    = rotation;
-            newNode->m_transform.m_scale       = scale;
+//            newNode->m_transform.m_translation = translation;
+//            newNode->m_transform.m_rotation    = rotation;
+//            newNode->m_transform.m_scale       = scale;
         }
         else
         {
             if ( p_node->has_translation )
             {
-                newNode->m_transform.m_translation = glm::vec3(
-                        p_node->translation[0],
-                        p_node->translation[1],
-                        p_node->translation[2]
-                        );
+                newNode->m_transform.m_translation = glm::vec3( p_node->translation[0], p_node->translation[1], p_node->translation[2] );
             }
 
             if ( p_node->has_rotation )
             {
-                newNode->m_transform.m_rotation = glm::quat(
-                        p_node->rotation[3], // w
-                        p_node->rotation[0], // x
-                        p_node->rotation[1], // y
-                        p_node->rotation[2] // z
-                        );
+                newNode->m_transform.m_rotation = glm::quat( p_node->rotation[3],  // w
+                                                             p_node->rotation[0],  // x
+                                                             p_node->rotation[1],  // y
+                                                             p_node->rotation[2]  // z
+                );
             }
 
             if ( p_node->has_scale )
             {
-                newNode->m_transform.m_scale = glm::vec3(
-                        p_node->scale[0],
-                        p_node->scale[1],
-                        p_node->scale[2]
-                        );
+                newNode->m_transform.m_scale = glm::vec3( p_node->scale[0], p_node->scale[1], p_node->scale[2] );
             }
         }
         newNode->m_transform.update();
@@ -169,19 +152,15 @@ namespace Tomos
         p_parentNode->addChild( newNode );
     }
 
-    void GLBLoader::processMesh( cgltf_mesh*                             p_mesh, cgltf_data* p_data,
-                                 const std::shared_ptr<Node>&            p_node,
-                                 const std::shared_ptr<Shader>&          p_shader,
-                                 std::vector<std::shared_ptr<Material>>& p_materials,
-                                 bool                                    p_useCache )
+    void GLBLoader::processMesh( cgltf_mesh* p_mesh, cgltf_data* p_data, const std::shared_ptr<Node>& p_node, const std::shared_ptr<Shader>& p_shader,
+                                 std::vector<std::shared_ptr<Material>>& p_materials, bool p_useCache )
     {
         for ( size_t i = 0; i < p_mesh->primitives_count; i++ )
         {
             cgltf_primitive* primitive = &p_mesh->primitives[i];
 
             // Generate a unique key for this mesh primitive
-            std::string meshKey = std::string( p_mesh->name ? p_mesh->name : "unnamed" ) +
-                                  "_primitive_" + std::to_string( i );
+            std::string meshKey = std::string( p_mesh->name ? p_mesh->name : "unnamed" ) + "_primitive_" + std::to_string( i );
 
             std::shared_ptr<Mesh> meshComponent;
 
@@ -255,8 +234,8 @@ namespace Tomos
 
                     if ( accessor->component_type == cgltf_component_type_r_16u )
                     {
-                        const uint16_t* src = ( const uint16_t* ) ( ( uint8_t* ) accessor->buffer_view->buffer->data +
-                                                                    accessor->offset + accessor->buffer_view->offset );
+                        const uint16_t* src =
+                                ( const uint16_t* ) ( ( uint8_t* ) accessor->buffer_view->buffer->data + accessor->offset + accessor->buffer_view->offset );
                         for ( size_t k = 0; k < accessor->count; k++ )
                         {
                             indices[k] = src[k];
@@ -264,8 +243,8 @@ namespace Tomos
                     }
                     else if ( accessor->component_type == cgltf_component_type_r_32u )
                     {
-                        const uint32_t* src = ( const uint32_t* ) ( ( uint8_t* ) accessor->buffer_view->buffer->data +
-                                                                    accessor->offset + accessor->buffer_view->offset );
+                        const uint32_t* src =
+                                ( const uint32_t* ) ( ( uint8_t* ) accessor->buffer_view->buffer->data + accessor->offset + accessor->buffer_view->offset );
                         for ( size_t k = 0; k < accessor->count; k++ )
                         {
                             indices[k] = src[k];
@@ -279,9 +258,7 @@ namespace Tomos
                 }
 
                 // Create buffers
-                auto positionBuffer = std::make_shared<VertexBuffer>(
-                        positions.data(),
-                        positions.size() * sizeof( float ) );
+                auto positionBuffer = std::make_shared<VertexBuffer>( positions.data(), positions.size() * sizeof( float ) );
 
                 auto normalBuffer = normals.empty() ? nullptr : std::make_shared<VertexBuffer>( normals.data(), normals.size() * sizeof( float ) );
 
@@ -292,13 +269,7 @@ namespace Tomos
                 auto indexBuffer = indices.empty() ? nullptr : std::make_shared<IndexBuffer>( indices.data(), indices.size() );
 
                 // Create mesh
-                meshComponent = std::make_shared<Mesh>(
-                        positionBuffer,
-                        normalBuffer,
-                        texCoordBuffer,
-                        tangentBuffer,
-                        indexBuffer,
-                        p_shader );
+                meshComponent = std::make_shared<Mesh>( positionBuffer, normalBuffer, texCoordBuffer, tangentBuffer, indexBuffer, p_shader );
 
                 // Add to cache if enabled
                 if ( p_useCache )
@@ -326,14 +297,11 @@ namespace Tomos
         }
     }
 
-    std::shared_ptr<Material> GLBLoader::loadMaterial( cgltf_material*                p_cgltfMat,
-                                                       const std::shared_ptr<Shader>& p_shader,
-                                                       cgltf_data*                    p_data,
-                                                       bool                           p_useCache )
+    std::shared_ptr<Material> GLBLoader::loadMaterial( cgltf_material* p_cgltfMat, const std::shared_ptr<Shader>& p_shader, cgltf_data* p_data,
+                                                       bool p_useCache )
     {
-        std::string materialKey = p_cgltfMat->name
-                                      ? std::string( "GLB_Material_" ) + p_cgltfMat->name
-                                      : std::string( "GLB_Material_" ) + std::to_string( ResourceManager::getNewResourceId() );
+        std::string materialKey = p_cgltfMat->name ? std::string( "GLB_Material_" ) + p_cgltfMat->name
+                                                   : std::string( "GLB_Material_" ) + std::to_string( ResourceManager::getNewResourceId() );
 
         // Check cache if enabled
         if ( p_useCache )
@@ -347,8 +315,7 @@ namespace Tomos
 
         // Load textures (with caching)
         std::shared_ptr<Texture> baseTexture = nullptr;
-        if ( p_cgltfMat->has_pbr_metallic_roughness &&
-             p_cgltfMat->pbr_metallic_roughness.base_color_texture.texture )
+        if ( p_cgltfMat->has_pbr_metallic_roughness && p_cgltfMat->pbr_metallic_roughness.base_color_texture.texture )
         {
             baseTexture = loadTexture( p_cgltfMat->pbr_metallic_roughness.base_color_texture.texture, p_data, p_useCache );
         }
@@ -360,11 +327,9 @@ namespace Tomos
         }
 
         std::shared_ptr<Texture> metallicRoughnessTexture = nullptr;
-        if ( p_cgltfMat->has_pbr_metallic_roughness &&
-             p_cgltfMat->pbr_metallic_roughness.metallic_roughness_texture.texture )
+        if ( p_cgltfMat->has_pbr_metallic_roughness && p_cgltfMat->pbr_metallic_roughness.metallic_roughness_texture.texture )
         {
-            metallicRoughnessTexture = loadTexture(
-                    p_cgltfMat->pbr_metallic_roughness.metallic_roughness_texture.texture, p_data, p_useCache );
+            metallicRoughnessTexture = loadTexture( p_cgltfMat->pbr_metallic_roughness.metallic_roughness_texture.texture, p_data, p_useCache );
         }
 
         std::shared_ptr<Texture> emissionTexture = nullptr;
@@ -377,12 +342,8 @@ namespace Tomos
         glm::vec4 baseColor( 1.0f );
         if ( p_cgltfMat->has_pbr_metallic_roughness )
         {
-            baseColor = glm::vec4(
-                    p_cgltfMat->pbr_metallic_roughness.base_color_factor[0],
-                    p_cgltfMat->pbr_metallic_roughness.base_color_factor[1],
-                    p_cgltfMat->pbr_metallic_roughness.base_color_factor[2],
-                    p_cgltfMat->pbr_metallic_roughness.base_color_factor[3]
-                    );
+            baseColor = glm::vec4( p_cgltfMat->pbr_metallic_roughness.base_color_factor[0], p_cgltfMat->pbr_metallic_roughness.base_color_factor[1],
+                                   p_cgltfMat->pbr_metallic_roughness.base_color_factor[2], p_cgltfMat->pbr_metallic_roughness.base_color_factor[3] );
         }
 
         float metallic = p_cgltfMat->has_pbr_metallic_roughness ? p_cgltfMat->pbr_metallic_roughness.metallic_factor : 0.0f;
@@ -392,19 +353,9 @@ namespace Tomos
         glm::vec3 emission( 0.0f );
         if ( p_cgltfMat->has_emissive_strength )
         {
-            emission = glm::vec3(
-                    p_cgltfMat->emissive_factor[0] * p_cgltfMat->emissive_strength.emissive_strength,
-                    p_cgltfMat->emissive_factor[1] * p_cgltfMat->emissive_strength.emissive_strength,
-                    p_cgltfMat->emissive_factor[2] * p_cgltfMat->emissive_strength.emissive_strength
-                    );
-        }
-        else if ( p_cgltfMat->emissive_factor )
-        {
-            emission = glm::vec3(
-                    p_cgltfMat->emissive_factor[0],
-                    p_cgltfMat->emissive_factor[1],
-                    p_cgltfMat->emissive_factor[2]
-                    );
+            emission = glm::vec3( p_cgltfMat->emissive_factor[0] * p_cgltfMat->emissive_strength.emissive_strength,
+                                  p_cgltfMat->emissive_factor[1] * p_cgltfMat->emissive_strength.emissive_strength,
+                                  p_cgltfMat->emissive_factor[2] * p_cgltfMat->emissive_strength.emissive_strength );
         }
 
         // Alpha mode
@@ -420,21 +371,10 @@ namespace Tomos
 
         float alphaCutoff = p_cgltfMat->alpha_cutoff;
 
-        auto material = std::make_shared<Material>(
-                p_shader,
-                baseColor,
-                emission,
-                metallic,
-                roughness,
-                1.0f, // normal scale
-                alphaCutoff,
-                alphaMode,
-                baseTexture ? baseTexture : Material::getDefaultWhite(),
-                metallicRoughnessTexture,
-                emissionTexture,
-                normalTexture,
-                Sampler::createLinearRepeat(),
-                materialKey );
+        auto material = std::make_shared<Material>( p_shader, baseColor, emission, metallic, roughness,
+                                                    1.0f,  // normal scale
+                                                    alphaCutoff, alphaMode, baseTexture ? baseTexture : Material::getDefaultWhite(), metallicRoughnessTexture,
+                                                    emissionTexture, normalTexture, Sampler::createLinearRepeat(), materialKey );
 
         // Add to cache if enabled
         if ( p_useCache )
@@ -445,9 +385,7 @@ namespace Tomos
         return material;
     }
 
-    std::shared_ptr<Texture> GLBLoader::loadTexture( cgltf_texture* p_texture,
-                                                     cgltf_data*    p_data,
-                                                     bool           p_useCache )
+    std::shared_ptr<Texture> GLBLoader::loadTexture( cgltf_texture* p_texture, cgltf_data* p_data, bool p_useCache )
     {
         if ( !p_texture || !p_texture->image )
         {
@@ -486,14 +424,10 @@ namespace Tomos
         // Handle embedded texture
         if ( image->buffer_view )
         {
-            const uint8_t* data_ptr = ( const uint8_t* ) image->buffer_view->buffer->data +
-                                      image->buffer_view->offset;
-            size_t data_size = image->buffer_view->size;
+            const uint8_t* data_ptr  = ( const uint8_t* ) image->buffer_view->buffer->data + image->buffer_view->offset;
+            size_t         data_size = image->buffer_view->size;
 
-            textureObj = Texture::createFromMemory(
-                    data_ptr,
-                    data_size,
-                    TextureFormat::SRGBA8 );
+            textureObj = Texture::createFromMemory( data_ptr, data_size, TextureFormat::SRGBA8 );
         }
         else if ( image->uri )
         {
@@ -513,22 +447,15 @@ namespace Tomos
 
     std::shared_ptr<Material> GLBLoader::createDefaultMaterial( const std::shared_ptr<Shader>& p_shader )
     {
-        return std::make_shared<Material>(
-                p_shader,
-                glm::vec4( 1.0f ), // white
-                glm::vec3( 0.0f ), // no emission
-                0.0f, // non-metallic
-                1.0f, // fully rough
-                1.0f, // normal scale
-                0.5f, // alpha cutoff
-                AlphaMode::OPAQUE,
-                Material::getDefaultWhite(),
-                Material::getDefaultWhite(),
-                nullptr,
-                Material::getDefaultNormal(),
-                Sampler::createLinearRepeat(),
-                "DefaultMaterial"
-                );
+        return std::make_shared<Material>( p_shader,
+                                           glm::vec4( 1.0f ),  // white
+                                           glm::vec3( 0.0f ),  // no emission
+                                           0.0f,  // non-metallic
+                                           1.0f,  // fully rough
+                                           1.0f,  // normal scale
+                                           0.5f,  // alpha cutoff
+                                           AlphaMode::OPAQUE, Material::getDefaultWhite(), Material::getDefaultWhite(), nullptr, Material::getDefaultNormal(),
+                                           Sampler::createLinearRepeat(), "DefaultMaterial" );
     }
 
     void GLBLoader::clearCache()
@@ -537,4 +464,4 @@ namespace Tomos
         g_resourceCache.m_materialCache.clear();
         g_resourceCache.m_textureCache.clear();
     }
-} // namespace Tomos
+}  // namespace Tomos

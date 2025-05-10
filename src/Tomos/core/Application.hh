@@ -1,11 +1,11 @@
 #pragma once
 #include <memory>
 
-#include "Tomos/util/input/Input.hh"
 #include "Ecs.hh"
 #include "Layer.hh"
-#include "Window.hh"
+#include "Tomos/util/input/Input.hh"
 #include "Tomos/util/time/Time.hh"
+#include "Window.hh"
 
 namespace Tomos
 {
@@ -16,25 +16,22 @@ namespace Tomos
     {
         friend class Application;
 
-        State()
-        {
-            LOG_WARN() << "State constructor";
-        }
+        State() { LOG_WARN() << "State constructor"; }
 
-        ECS        m_ecs;
+        ECS m_ecs;
+
+        // Not intended to be used directly
         LayerStack m_layerStack;
-        Input      m_input;
-        Time       m_time;
 
-        float m_aspectRatio = 16.0f / 9.0f;
-        int   m_width       = 1280;
-        int   m_height      = 720;
+        Input m_input;
+        Time  m_time;
     };
 
     class Application
     {
     public:
         static Application* get();
+        static void         init( const WindowProps& p_props = WindowProps() );
 
         void run();
 
@@ -45,11 +42,11 @@ namespace Tomos
 
         static State& getState() { return get()->m_state; }
 
-        void PushLayer( Layer* p_layer );
-        void PushOverlay( Layer* p_overlay );
+        void pushLayer( Layer* p_layer );
+        void pushOverlay( Layer* p_overlay );
 
     private:
-        Application();
+        Application( const WindowProps& p_props = WindowProps() );
         ~Application()                               = default;
         Application( const Application& )            = delete;
         Application& operator=( const Application& ) = delete;
@@ -61,4 +58,4 @@ namespace Tomos
         static Application* g_instance;
         State               m_state;
     };
-} // namespace Tomos
+}  // namespace Tomos

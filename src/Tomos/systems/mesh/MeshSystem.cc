@@ -26,24 +26,31 @@ namespace Tomos
     }
 
     void MeshSystem::lateUpdate()
+{
+    // Get view projection matrix once
+    auto viewProj = Application::getState().m_ecs.getSystem<CameraSystem>().getViewProjectionMat();
+
+    // Start batch
+    Renderer::beginBatch();
+
+    for (auto& [component, node] : m_components)
     {
-        for ( auto& [component, node] : m_components )
+        if (!node->isActive()) continue;
+
+        auto meshComponent = std::dynamic_pointer_cast<MeshComponent>(component);
+        auto mesh = meshComponent->getMesh();
+        auto material = meshComponent->getMaterial();
+
+        if (mesh && material)
         {
-            if ( !node->isActive() ) continue;
-
-            auto meshComponent = std::dynamic_pointer_cast<MeshComponent>( component );
-            auto mesh          = meshComponent->getMesh();
-            auto material      = meshComponent->getMaterial();
-
-            if ( mesh && material )
-            {
-                material->bind();
-
-                Renderer::draw( meshComponent->getMesh()->getShader(),
-                                mesh->getVertexArray(),
-                                node->m_transform.m_globMat,
-                                Application::getState().m_ecs.getSystem<CameraSystem>().getViewProjectionMat() );
-            }
+            Renderer::addToBatch(mesh->getShader(),
+                               material,
+                               mesh->getVertexArray(),
+                               node->m_transform.m_globMat);
         }
     }
+
+    // End batch and render everything
+    Renderer::endBatch(viewProj);
+}
 } // Tomos

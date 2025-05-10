@@ -84,6 +84,21 @@ add_library(${PROJECT_NAME} STATIC
         src/Tomos/util/renderer/Sampler.hh
         src/Tomos/systems/physics/PhysicsSystem.cc
         src/Tomos/systems/physics/PhysicsSystem.hh
+        src/Tomos/util/imgui/ImGuiLayer.cc
+        src/Tomos/util/imgui/ImGuiLayer.hh
+        src/Tomos/lib/imgui/imgui.cpp
+        src/Tomos/lib/imgui/imgui_demo.cpp
+        src/Tomos/lib/imgui/imgui_draw.cpp
+        src/Tomos/lib/imgui/imgui_impl_glfw.cpp
+        src/Tomos/lib/imgui/imgui_impl_opengl3.cpp
+        src/Tomos/lib/imgui/imgui_impl_opengl3_loader.h
+        src/Tomos/lib/imgui/imgui_internal.h
+        src/Tomos/lib/imgui/imgui_tables.cpp
+        src/Tomos/lib/imgui/imgui_widgets.cpp
+        src/Tomos/lib/imgui/imstb_rectpack.h
+        src/Tomos/lib/imgui/imstb_textedit.h
+        src/Tomos/lib/imgui/imstb_truetype.h
+
 )
 
 # Set absolute paths for source and destination directories
@@ -98,6 +113,7 @@ if (EXISTS "${RESOURCE_SOURCE_DIR}")
     file(GLOB_RECURSE RESOURCE_FILES
             LIST_DIRECTORIES false
             RELATIVE "${RESOURCE_SOURCE_DIR}"
+            CONFIGURE_DEPENDS
             "${RESOURCE_SOURCE_DIR}/*")
 
     # Debug output to verify found files
