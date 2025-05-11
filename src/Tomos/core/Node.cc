@@ -4,7 +4,6 @@
 
 #include "Node.hh"
 #include "Application.hh"
-#include "Scene.hh"
 
 namespace Tomos
 {
@@ -16,12 +15,20 @@ namespace Tomos
     void Node::addChild( const std::shared_ptr<Node>& p_child )
     {
         this->m_children.emplace( p_child );
-        p_child->setActive( true );
+        p_child->m_parent = this;
+        p_child->m_active = this->m_active;
+        p_child->traverse( []( Node& node )
+                           {
+                               node.m_layerId = node.m_parent->m_layerId;
+                               node.m_active  = node.m_parent->m_active;
+                           }
+                           , []( Node& node )
+                           {
+                           } );
     }
 
     bool Node::removeChild( const std::shared_ptr<Node>& p_child )
     {
-        p_child->setActive( false );
         return this->m_children.erase( p_child ) > 0;
     }
 
@@ -35,33 +42,52 @@ namespace Tomos
         p_after( *this );
     }
 
+    void Node::setActive( bool p_active )
+    {
+        traverse(
+                [p_active]( Node& node ) { node.m_active = p_active; },
+                []( Node& )
+                {
+                } );
+    }
+
     bool Node::isInScene() const
     {
-        if ( dynamic_cast<const Scene*>( this ) != nullptr )
+        if ( dynamic_cast<const SceneNode*>( this ) != nullptr )
         {
             return true;
         }
 
-        if ( m_parent.lock() == nullptr )
+        if ( m_parent == nullptr )
         {
             return false;
         }
 
-        return m_parent.lock()->isInScene();
+        return m_parent->isInScene();
     }
 
     void Node::addComponent( const std::shared_ptr<Component>& p_component )
     {
-        if ( !isInScene() )
+        int res = Application::getState().m_ecs.registerComponent( p_component, shared_from_this() );
+        if ( res != 0 )
         {
-            Application::getState().m_ecs.registerComponent( p_component, shared_from_this() );
+            LOG_WARN() << "Failed to register component";
+            return;
         }
+
+
         this->m_components.push_back( p_component );
     }
 
     void Node::removeComponent( const std::shared_ptr<Component>& p_component )
     {
-        Application::getState().m_ecs.destroyComponent( p_component, shared_from_this() );
+        int res = Application::getState().m_ecs.destroyComponent( p_component, shared_from_this() );
+        if ( res != 0 )
+        {
+            LOG_WARN() << "Failed to destroy component";
+            return;
+        }
+
         auto it = std::find( m_components.begin(), m_components.end(), p_component );
         if ( it != m_components.end() )
         {
@@ -81,9 +107,9 @@ namespace Tomos
             child->destroy();
         }
 
-        if ( auto p = m_parent.lock() )
+        if ( m_parent )
         {
-            p->removeChild( shared_from_this() );
+            m_parent->removeChild( shared_from_this() );
         }
     }
 
@@ -130,15 +156,6 @@ namespace Tomos
         }
 
         return nullptr;
-    }
-
-    void Node::setActive( bool p_active )
-    {
-        traverse(
-                [p_active]( Node& node ) { node.m_active = p_active; },
-                []( Node& )
-                {
-                } );
     }
 
     std::shared_ptr<Node> Node::assertChildByName( const std::string& name, unsigned int maxDepth ) const

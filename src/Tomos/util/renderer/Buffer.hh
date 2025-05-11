@@ -148,7 +148,6 @@ namespace Tomos
 
         std::vector<BufferElement>::iterator begin() { return m_elements.begin(); }
         std::vector<BufferElement>::iterator end() { return m_elements.end(); }
-
     private:
         void calculateOffsetsAndStride();
 
@@ -164,13 +163,15 @@ namespace Tomos
 
         void                setLayout( const BufferLayout& p_layout ) { m_layout = p_layout; }
         const BufferLayout& getLayout() const { return m_layout; }
+        unsigned int        getSize() const { return m_size; } // Add this line
 
-        VertexBuffer( const float* p_verticies, unsigned int p_size );
+        VertexBuffer( const float* p_verticies, unsigned int p_size, GLenum p_usage = GL_STATIC_DRAW );
         ~VertexBuffer();
 
     private:
         unsigned int m_rendererId{};
         BufferLayout m_layout;
+        unsigned int m_size{};
     };
 
     class IndexBuffer
@@ -179,7 +180,7 @@ namespace Tomos
         void bind() const;
         void unbind() const;
 
-        IndexBuffer( const unsigned int* p_indicies, unsigned int p_count );
+        IndexBuffer( const unsigned int* p_indicies, unsigned int p_count, GLenum p_usage = GL_STATIC_DRAW );
         ~IndexBuffer();
 
         unsigned int getCount() const { return m_count; }

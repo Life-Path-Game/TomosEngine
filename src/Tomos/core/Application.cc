@@ -53,23 +53,19 @@ namespace Tomos
     {
         LOG_DEBUG() << "Start";
 
-        glEnable( GL_DEPTH_TEST );
-
         while ( m_running )
         {
             // Time update
             auto currentTime = ( float ) glfwGetTime();
             getState().m_time.update( currentTime );
 
-            // Global ECS update
-            getState().m_ecs.earlyUpdate();
-            getState().m_ecs.update();
-
-            // Global fixed time step ECS update
-            getState().m_ecs.updateFixedTimeStep( getState().m_time.deltaTime() );
+            getState().m_ecs.updateLayerComponents();
 
             for ( auto& layer : getState().m_layerStack )
             {
+                // Bind layer framebuffer
+                Renderer::beginFrameBufferRender( layer->getFrameBuffer() );
+
                 // Layer specific ECS update
                 getState().m_ecs.earlyUpdate( layer->getLayerId() );
                 getState().m_ecs.update( layer->getLayerId() );
@@ -82,10 +78,17 @@ namespace Tomos
 
                 // Layer specific late ECS update
                 getState().m_ecs.lateUpdate( layer->getLayerId() );
+
+                Renderer::endFrameBufferRender();
             }
 
-            // Global ECS late update
-            getState().m_ecs.lateUpdate();
+            // Second pass: Composite all layers
+            Renderer::clear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+            for ( auto& layer : getState().m_layerStack )
+            {
+                Renderer::renderFrameBuffer( layer->getFrameBuffer(), layer->getShader() );
+            }
 
             // Window update
             m_window->onUpdate();
@@ -104,28 +107,28 @@ namespace Tomos
                 [this]( Event& p_event )
                 {
                     auto& e = dynamic_cast<WindowResizeEvent&>( p_event );
-                    //                    getWindow().getData().m_aspectRatio = ( float ) e.getWidth() / ( float ) e.getHeight();
-                    //                    getWindow().getData().m_width       = e.getWidth();
-                    //                    getWindow().getData().m_height      = e.getHeight();
-                    int viewportWidth, viewportHeight;
-                    int offsetX = 0, offsetY = 0;
+                    int   viewportWidth, viewportHeight;
+                    int   offsetX = 0,   offsetY = 0;
 
                     if ( ( float ) e.getWidth() / ( float ) e.getHeight() > getWindow().getData().m_aspectRatio )
                     {
-                        // Window is wider than target - add side bars
                         viewportHeight = e.getHeight();
                         viewportWidth  = ( int ) ( e.getHeight() * getWindow().getData().m_aspectRatio );
                         offsetX        = ( e.getWidth() - viewportWidth ) / 2;
                     }
                     else
                     {
-                        // Window is taller than target - add top/bottom bars
                         viewportWidth  = e.getWidth();
                         viewportHeight = ( int ) ( e.getWidth() / getWindow().getData().m_aspectRatio );
                         offsetY        = ( e.getHeight() - viewportHeight ) / 2;
                     }
 
-                    // Set the viewport
+                    // Resize all framebuffers
+                    for ( auto& layer : getState().m_layerStack )
+                    {
+                        layer->getFrameBuffer()->resize( viewportWidth, viewportHeight );
+                    }
+
                     glViewport( offsetX, offsetY, viewportWidth, viewportHeight );
                     return false;
                 } );
@@ -159,4 +162,4 @@ namespace Tomos
         getState().m_layerStack.pushOverlay( p_overlay );
         p_overlay->onAttach();
     }
-}  // namespace Tomos
+} // namespace Tomos

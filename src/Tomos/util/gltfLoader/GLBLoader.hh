@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Tomos/util/renderer/Texture.hh"
-#include "Tomos/systems/mesh/Material.hh"
+#include "Tomos/util/renderer/Material.hh"
 #include <vector>
 #include <memory>
 #include "Tomos/lib/cgltf.h"
 #include "Tomos/util/resourceManager/ResourceManager.hh"
 #include "Tomos/core/Node.hh"
-#include "Tomos/systems/mesh/Mesh.hh"
+#include "Tomos/util/renderer/Mesh.hh"
 
 namespace Tomos
 {

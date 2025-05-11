@@ -1,27 +1,32 @@
 #pragma once
 
-#include <map>
 #include <typeindex>
 
-#include "Tomos/core/Node.hh"
 #include "Component.hh"
+#include "Tomos/core/Node.hh"
 
 namespace Tomos
 {
     class System
     {
+        friend class ECS;
+
     public:
+        System()
+        {
+        }
+
         virtual ~System() = default;
 
-        virtual void earlyUpdate()
+        virtual void earlyUpdate( int p_layerId )
         {
         };
 
-        virtual void update()
+        virtual void update( int p_layerId )
         {
         };
 
-        virtual void lateUpdate()
+        virtual void lateUpdate( int p_layerId )
         {
         };
 
@@ -35,8 +40,15 @@ namespace Tomos
 
         virtual std::type_index getComponentType() const { return typeid( nullptr ); };
 
+        std::unordered_map<int, std::unordered_map<std::shared_ptr<Component>, std::shared_ptr<Node>>>& getComponents()
+        {
+            return m_components;
+        }
+
     protected:
-        std::map<std::shared_ptr<Component>, std::shared_ptr<Node>> m_components;
+        // Component, Node pairs for each layer
+        // Layer -1 is unassigned
+        std::unordered_map<int, std::unordered_map<std::shared_ptr<Component>, std::shared_ptr<Node>>> m_components;
     };
 
     class FixedTimeStepSystem : public System
@@ -47,16 +59,16 @@ namespace Tomos
         {
         }
 
-        virtual void update( float p_deltaTime )
+        virtual void update( float p_deltaTime, int p_layerId )
         {
             m_accumulator += p_deltaTime;
 
             while ( m_accumulator >= m_fixedTimeStep )
             {
                 m_accumulator -= m_fixedTimeStep;
-                System::earlyUpdate();
-                System::update();
-                System::lateUpdate();
+                System::earlyUpdate( p_layerId );
+                System::update( p_layerId );
+                System::lateUpdate( p_layerId );
             }
         }
 

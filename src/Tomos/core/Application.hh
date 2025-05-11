@@ -20,7 +20,6 @@ namespace Tomos
 
         ECS m_ecs;
 
-        // Not intended to be used directly
         LayerStack m_layerStack;
 
         Input m_input;

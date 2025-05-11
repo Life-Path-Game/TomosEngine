@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 
-#include "Mesh.hh"
-#include "Material.hh"
+#include "../../util/renderer/Mesh.hh"
+#include "../../util/renderer/Material.hh"
 #include "Tomos/systems/Component.hh"
 
 namespace Tomos

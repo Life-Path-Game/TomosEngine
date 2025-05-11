@@ -47,7 +47,7 @@ namespace Tomos
         // Process all nodes recursively
         for ( size_t i = 0; i < data->nodes_count; i++ )
         {
-            if ( !data->nodes[i].parent )  // Only process root nodes, children will be processed recursively
+            if ( !data->nodes[i].parent ) // Only process root nodes, children will be processed recursively
             {
                 processNode( &data->nodes[i], data, rootNode, p_shader, result.m_materials, p_useCache );
             }
@@ -69,7 +69,7 @@ namespace Tomos
 
     std::shared_ptr<Node> GLBLoader::deepCopyNode( const std::shared_ptr<Node>& p_original )
     {
-        auto copy = std::make_shared<SceneNode>( p_original->m_name + "_Instance" );
+        auto copy = std::make_shared<Node>( p_original->m_name + "_Instance" );
 
         // Copy transform
         copy->m_transform = p_original->m_transform;
@@ -96,7 +96,7 @@ namespace Tomos
                                  std::vector<std::shared_ptr<Material>>& p_materials, bool p_useCache )
     {
         // Create a new node
-        auto newNode = std::make_shared<SceneNode>( p_node->name ? p_node->name : "UnnamedNode" );
+        auto newNode = std::make_shared<Node>( p_node->name ? p_node->name : "UnnamedNode" );
 
         // Set transform
         if ( p_node->has_matrix )
@@ -110,9 +110,9 @@ namespace Tomos
             glm::vec4 perspective;
             glm::decompose( matrix, scale, rotation, translation, skew, perspective );
 
-//            newNode->m_transform.m_translation = translation;
-//            newNode->m_transform.m_rotation    = rotation;
-//            newNode->m_transform.m_scale       = scale;
+            //            newNode->m_transform.m_translation = translation;
+            //            newNode->m_transform.m_rotation    = rotation;
+            //            newNode->m_transform.m_scale       = scale;
         }
         else
         {
@@ -123,11 +123,11 @@ namespace Tomos
 
             if ( p_node->has_rotation )
             {
-                newNode->m_transform.m_rotation = glm::quat( p_node->rotation[3],  // w
-                                                             p_node->rotation[0],  // x
-                                                             p_node->rotation[1],  // y
-                                                             p_node->rotation[2]  // z
-                );
+                newNode->m_transform.m_rotation = glm::quat( p_node->rotation[3], // w
+                                                             p_node->rotation[0], // x
+                                                             p_node->rotation[1], // y
+                                                             p_node->rotation[2] // z
+                        );
             }
 
             if ( p_node->has_scale )
@@ -298,10 +298,11 @@ namespace Tomos
     }
 
     std::shared_ptr<Material> GLBLoader::loadMaterial( cgltf_material* p_cgltfMat, const std::shared_ptr<Shader>& p_shader, cgltf_data* p_data,
-                                                       bool p_useCache )
+                                                       bool            p_useCache )
     {
-        std::string materialKey = p_cgltfMat->name ? std::string( "GLB_Material_" ) + p_cgltfMat->name
-                                                   : std::string( "GLB_Material_" ) + std::to_string( ResourceManager::getNewResourceId() );
+        std::string materialKey = p_cgltfMat->name
+                                      ? std::string( "GLB_Material_" ) + p_cgltfMat->name
+                                      : std::string( "GLB_Material_" ) + std::to_string( ResourceManager::getNewResourceId() );
 
         // Check cache if enabled
         if ( p_useCache )
@@ -372,7 +373,7 @@ namespace Tomos
         float alphaCutoff = p_cgltfMat->alpha_cutoff;
 
         auto material = std::make_shared<Material>( p_shader, baseColor, emission, metallic, roughness,
-                                                    1.0f,  // normal scale
+                                                    1.0f, // normal scale
                                                     alphaCutoff, alphaMode, baseTexture ? baseTexture : Material::getDefaultWhite(), metallicRoughnessTexture,
                                                     emissionTexture, normalTexture, Sampler::createLinearRepeat(), materialKey );
 
@@ -448,12 +449,12 @@ namespace Tomos
     std::shared_ptr<Material> GLBLoader::createDefaultMaterial( const std::shared_ptr<Shader>& p_shader )
     {
         return std::make_shared<Material>( p_shader,
-                                           glm::vec4( 1.0f ),  // white
-                                           glm::vec3( 0.0f ),  // no emission
-                                           0.0f,  // non-metallic
-                                           1.0f,  // fully rough
-                                           1.0f,  // normal scale
-                                           0.5f,  // alpha cutoff
+                                           glm::vec4( 1.0f ), // white
+                                           glm::vec3( 0.0f ), // no emission
+                                           0.0f, // non-metallic
+                                           1.0f, // fully rough
+                                           1.0f, // normal scale
+                                           0.5f, // alpha cutoff
                                            AlphaMode::OPAQUE, Material::getDefaultWhite(), Material::getDefaultWhite(), nullptr, Material::getDefaultNormal(),
                                            Sampler::createLinearRepeat(), "DefaultMaterial" );
     }
@@ -464,4 +465,4 @@ namespace Tomos
         g_resourceCache.m_materialCache.clear();
         g_resourceCache.m_textureCache.clear();
     }
-}  // namespace Tomos
+} // namespace Tomos

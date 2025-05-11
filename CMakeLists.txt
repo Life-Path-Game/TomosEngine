@@ -53,8 +53,6 @@ add_library(${PROJECT_NAME} STATIC
         src/Tomos/util/input/Input.hh
         src/Tomos/core/Layer.cc
         src/Tomos/core/Layer.hh
-        src/Tomos/core/Scene.cc
-        src/Tomos/core/Scene.hh
         src/Tomos/util/renderer/Buffer.cc
         src/Tomos/util/renderer/Buffer.hh
         src/Tomos/util/renderer/VertexArray.cc
@@ -70,14 +68,10 @@ add_library(${PROJECT_NAME} STATIC
         src/Tomos/lib/lib.cc
         src/Tomos/lib/json.hpp
         src/Tomos/systems/mesh/MeshComponent.hh
-        src/Tomos/systems/mesh/Mesh.hh
-        src/Tomos/systems/mesh/Mesh.cc
         src/Tomos/systems/mesh/MeshSystem.cc
         src/Tomos/systems/mesh/MeshSystem.hh
         src/Tomos/util/gltfLoader/GLBLoader.cc
         src/Tomos/util/gltfLoader/GLBLoader.hh
-        src/Tomos/systems/mesh/Material.cc
-        src/Tomos/systems/mesh/Material.hh
         src/Tomos/util/renderer/Texture.cc
         src/Tomos/util/renderer/Texture.hh
         src/Tomos/util/renderer/Sampler.cc
@@ -98,6 +92,15 @@ add_library(${PROJECT_NAME} STATIC
         src/Tomos/lib/imgui/imstb_rectpack.h
         src/Tomos/lib/imgui/imstb_textedit.h
         src/Tomos/lib/imgui/imstb_truetype.h
+        src/Tomos/util/renderer/Mesh.cc
+        src/Tomos/util/renderer/Mesh.hh
+        src/Tomos/util/renderer/Material.cc
+        src/Tomos/util/renderer/Material.hh
+        src/Tomos/util/renderer/FrameBuffer.cc
+        src/Tomos/util/renderer/FrameBuffer.hh
+        src/Tomos/core/Scene.cc
+        src/Tomos/core/Scene.hh
+        src/Tomos/util/Defs.hh
 
 )
 

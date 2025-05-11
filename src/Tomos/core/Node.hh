@@ -9,7 +9,7 @@
 #include <set>
 
 #include "Tomos/systems/Component.hh"
-#include "Tomos/util/logger/Logger.hh"
+#include "Tomos/util/Defs.hh"
 #include "Tomos/util/transform/Transform.hh"
 
 namespace Tomos
@@ -52,12 +52,16 @@ namespace Tomos
         void setActive( bool p_active );
         bool isActive() const { return m_active; }
 
+        int getLayerId() const { return m_layerId; }
+
     protected:
-        std::weak_ptr<Node>                     m_parent{};
+        Node*                                   m_parent = nullptr;
         std::set<std::shared_ptr<Node>>         m_children;
         std::vector<std::shared_ptr<Component>> m_components;
 
         bool m_active = false;
+        // start as unassigned
+        int m_layerId = UNASSIGNED_LAYER_ID;
     };
 
     static void updateTransforms( Node* node )
@@ -72,9 +76,10 @@ namespace Tomos
     class SceneNode : public Node
     {
     public:
-        explicit SceneNode( const std::string& p_name = "SceneNode" ) :
+        explicit SceneNode( int p_layerId, const std::string& p_name = "SceneNode" ) :
             Node( p_name )
         {
+            m_layerId = p_layerId;
         }
 
         void computeTransforms() { updateTransforms( this ); }

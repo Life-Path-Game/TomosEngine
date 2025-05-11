@@ -3,31 +3,40 @@
 //
 
 #include "ScriptSystem.hh"
+#include "Tomos/util/logger/Logger.hh"
 
 namespace Tomos
 {
     void ScriptSystem::componentAdded( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
     {
         auto sc = std::dynamic_pointer_cast<ScriptComponent>( p_component );
-        if ( !m_components.erase( p_component ) )
+        if ( m_components.contains( p_node->getLayerId() ) && !m_components[p_node->getLayerId()].erase( p_component ) )
         {
             LOG_DEBUG() << "Component moved to new node: " << p_component->m_name;
         }
-        m_components[p_component] = p_node;
-        sc->getScript()->m_node   = p_node;
+        m_components[p_node->getLayerId()][p_component] = p_node;
+        sc->getScript()->m_node                         = p_node;
         sc->getScript()->onAttach();
     }
 
     void ScriptSystem::componentRemoved( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
     {
-        auto sc = std::dynamic_pointer_cast<ScriptComponent>( p_component );
-        m_components.erase( p_component );
-        sc->getScript()->onDetach();
+        if ( m_components.contains( p_node->getLayerId() ) )
+        {
+            auto sc = std::dynamic_pointer_cast<ScriptComponent>( p_component );
+            m_components[p_node->getLayerId()].erase( p_component );
+            sc->getScript()->onDetach();
+        }
     }
 
-    void ScriptSystem::earlyUpdate()
+    void ScriptSystem::earlyUpdate( int p_layerId )
     {
-        for ( auto& [component, node] : m_components )
+        if ( !m_components.contains( p_layerId ) )
+        {
+            return;
+        }
+
+        for ( auto& [component, node] : m_components[p_layerId] )
         {
             if ( !node->isActive() ) continue;
 
@@ -36,18 +45,28 @@ namespace Tomos
         }
     }
 
-    void ScriptSystem::update()
+    void ScriptSystem::update( int p_layerId )
     {
-        for ( auto& [component, node] : m_components )
+        if ( !m_components.contains( p_layerId ) )
+        {
+            return;
+        }
+
+        for ( auto& [component, node] : m_components[p_layerId] )
         {
             auto script = std::dynamic_pointer_cast<ScriptComponent>( component )->getScript();
             script->update();
         }
     }
 
-    void ScriptSystem::lateUpdate()
+    void ScriptSystem::lateUpdate( int p_layerId )
     {
-        for ( auto& [component, node] : m_components )
+        if ( !m_components.contains( p_layerId ) )
+        {
+            return;
+        }
+
+        for ( auto& [component, node] : m_components[p_layerId] )
         {
             auto script = std::dynamic_pointer_cast<ScriptComponent>( component )->getScript();
             script->lateUpdate();

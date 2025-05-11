@@ -5,7 +5,6 @@
 
 namespace Tomos
 {
-
     class Input
     {
     public:

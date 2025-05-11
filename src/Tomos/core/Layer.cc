@@ -3,12 +3,24 @@
 //
 
 #include "Layer.hh"
+#include "Application.hh"
 
 #include "Tomos/util/logger/Logger.hh"
 
 namespace Tomos
 {
-    LayerStack::LayerStack() {}
+    Layer::Layer( const std::string& p_name ) :
+        m_name( p_name )
+    {
+        auto& window   = Application::get()->getWindow();
+        m_layerId      = getNewLayerId();
+        m_frameBuffer  = std::make_shared<FrameBuffer>( window.getData().m_width, window.getData().m_height );
+        m_sceneManager = SceneManager();
+    }
+
+    LayerStack::LayerStack()
+    {
+    }
 
     LayerStack::~LayerStack()
     {
@@ -51,4 +63,4 @@ namespace Tomos
         }
         LOG_DEBUG() << "End";
     }
-}  // namespace Tomos
+} // namespace Tomos

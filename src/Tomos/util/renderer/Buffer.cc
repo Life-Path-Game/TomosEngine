@@ -3,9 +3,7 @@
 //
 
 #include "GL/glew.h"
-
 #include "Buffer.hh"
-
 #include "../logger/Logger.hh"
 
 namespace Tomos
@@ -31,11 +29,11 @@ namespace Tomos
         LOG_DEBUG() << "End";
     }
 
-    VertexBuffer::VertexBuffer( const float* p_verticies, unsigned int p_size )
+    VertexBuffer::VertexBuffer( const float* p_verticies, unsigned int p_size, GLenum p_usage )
     {
         glCreateBuffers( 1, &m_rendererId );
         bind();
-        glBufferData( GL_ARRAY_BUFFER, p_size, p_verticies, GL_STATIC_DRAW );
+        glBufferData( GL_ARRAY_BUFFER, p_size, p_verticies, p_usage );
     }
 
     VertexBuffer::~VertexBuffer()
@@ -55,7 +53,8 @@ namespace Tomos
         glBindBuffer( GL_ARRAY_BUFFER, 0 );
     }
 
-    IndexBuffer::IndexBuffer( const unsigned int* p_indicies, unsigned int p_count )
+    IndexBuffer::IndexBuffer( const unsigned int* p_indicies, unsigned int p_count, GLenum p_usage ) :
+        m_count( p_count )
     {
         glCreateBuffers( 1, &m_rendererId );
         // Umm this is real because OpenGL is stupid L
@@ -64,7 +63,7 @@ namespace Tomos
         // I hate state machines
         // I hate state machines
         glBindBuffer( GL_ARRAY_BUFFER, m_rendererId );
-        glBufferData( GL_ARRAY_BUFFER, p_count * sizeof( unsigned int ), p_indicies, GL_STATIC_DRAW );
+        glBufferData( GL_ARRAY_BUFFER, p_count * sizeof( unsigned int ), p_indicies, p_usage );
         m_count = p_count;
     }
 

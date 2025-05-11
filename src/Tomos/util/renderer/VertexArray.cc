@@ -5,6 +5,9 @@
 #include "VertexArray.hh"
 
 #include <GL/glew.h>
+#include <glm/fwd.hpp>
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
 
 #include "../logger/Logger.hh"
 

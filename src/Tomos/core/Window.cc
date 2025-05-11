@@ -35,6 +35,9 @@ namespace Tomos
         glfwMakeContextCurrent( m_window );
         glfwSetWindowUserPointer( m_window, &m_data );
 
+        if ( glfwRawMouseMotionSupported() )
+            glfwSetInputMode( m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE );
+
         glewExperimental = GL_TRUE;
         auto res         = glewInit();
         if ( res != GLEW_OK && res != GLEW_ERROR_NO_GLX_DISPLAY )
@@ -153,4 +156,4 @@ namespace Tomos
     void Window::setEventCallback( const EventCallback& p_callback ) { m_data.m_eventCallback = p_callback; }
 
     GLFWwindow* Window::getNativeWindow() const { return m_window; }
-}  // namespace Tomos
+} // namespace Tomos
