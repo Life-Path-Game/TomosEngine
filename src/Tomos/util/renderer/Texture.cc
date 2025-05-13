@@ -217,6 +217,15 @@ namespace Tomos
         glDeleteTextures( 1, &m_id );
     }
 
+    void Texture::cleanup()
+    {
+        if ( m_id )
+        {
+            glDeleteTextures( 1, &m_id );
+            m_id = 0;
+        }
+    }
+
     void Texture::bind( GLuint p_unit ) const
     {
         glActiveTexture( GL_TEXTURE0 + p_unit );

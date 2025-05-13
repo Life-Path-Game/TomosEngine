@@ -9,6 +9,14 @@ namespace Tomos
     class MeshSystem : public System
     {
     public:
+        struct DrawCall
+        {
+            std::shared_ptr<Shader>      m_shader;
+            std::shared_ptr<Material>    m_material;
+            std::shared_ptr<VertexArray> m_vertexArray;
+            glm::mat4                    m_transform;
+        };
+
         MeshSystem()
         {
         }
@@ -20,6 +28,10 @@ namespace Tomos
 
         void lateUpdate( int p_layerId ) override;
 
+        void                         clearDrawCalls( int layerId );
+        const std::vector<DrawCall>& getDrawCalls( int layerId ) const;
+
     private:
+        std::unordered_map<int, std::vector<DrawCall>> m_drawCalls;
     };
 } // Tomos

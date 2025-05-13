@@ -70,13 +70,13 @@ namespace Tomos
 #define LOG_ASSERT_MSG( p_expression, p_message )  \
     if ( !( p_expression ) )        \
     {                               \
-        LOG_ERROR() << p_message;   \
+        LOG_ERROR() << p_message << "\n";   \
         assert( p_expression );     \
     }
 #define LOG_ASSERT( p_expression )  \
     if ( !( p_expression ) )        \
     {                               \
-        LOG_ERROR() << "Assertion failed"; \
+        LOG_ERROR() << "Assertion failed" << "\n"; \
         assert( p_expression );     \
     }
 

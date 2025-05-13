@@ -12,10 +12,10 @@ namespace Tomos
     Layer::Layer( const std::string& p_name ) :
         m_name( p_name )
     {
-        auto& window   = Application::get()->getWindow();
-        m_layerId      = getNewLayerId();
-        m_frameBuffer  = std::make_shared<FrameBuffer>( window.getData().m_width, window.getData().m_height );
-        m_sceneManager = SceneManager();
+        auto& window       = Application::get()->getWindow();
+        m_layerId          = getNewLayerId();
+        m_sceneManager     = SceneManager();
+        m_layerFramebuffer = std::make_shared<FrameBuffer>( window.getData().m_width, window.getData().m_height );
     }
 
     LayerStack::LayerStack()
@@ -62,5 +62,24 @@ namespace Tomos
             m_layers.erase( it );
         }
         LOG_DEBUG() << "End";
+    }
+
+    void Layer::addRenderPass( std::unique_ptr<RenderPass> p_pass )
+    {
+        m_passes.push_back( std::move( p_pass ) );
+    }
+
+    const std::vector<std::unique_ptr<RenderPass>>& Layer::getRenderPasses() const
+    {
+        return m_passes;
+    }
+
+    void Layer::onResize( int p_width, int p_height )
+    {
+        m_layerFramebuffer->resize( p_width, p_height );
+        for ( auto& pass : m_passes )
+        {
+            pass->onResize( p_width, p_height );
+        }
     }
 } // namespace Tomos

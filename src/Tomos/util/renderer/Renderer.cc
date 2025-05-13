@@ -1,4 +1,6 @@
 #include "Renderer.hh"
+
+#include "Tomos/core/Application.hh"
 #include "Tomos/util/logger/Logger.hh"
 
 namespace Tomos
@@ -10,6 +12,9 @@ namespace Tomos
                        std::unordered_map<std::shared_ptr<VertexArray>, BatchData>,
                        MaterialBatchKeyHash> Renderer::g_batches;
     bool                                     Renderer::g_batching = false;
+
+    std::unordered_map<std::shared_ptr<VertexArray>,
+                       std::shared_ptr<StorageBuffer>> Renderer::g_instanceBuffers;
 
     void Renderer::setClearedColor( const glm::vec4& p_color )
     {
@@ -32,31 +37,32 @@ namespace Tomos
         g_batches.clear();
     }
 
-    void Renderer::endBatch( const glm::mat4& viewProjection )
+    void Renderer::endBatch( const glm::mat4& p_viewProjection )
     {
         if ( !g_batching ) return;
 
         for ( auto& [materialKey, meshBatches] : g_batches )
         {
-            // Bind shader and material once per group
-            materialKey.shader->bind();
-            materialKey.material->bind();
-            materialKey.shader->setMat4( "uViewProjection", viewProjection );
+            materialKey.m_shader->bind();
+            materialKey.m_material->bind();
+            materialKey.m_shader->setMat4( "uViewProjection", p_viewProjection );
 
             for ( auto& [vertexArray, batchData] : meshBatches )
             {
-                vertexArray->bind();
-
-                // Draw all instances with this shader/material/VAO combination
-                for ( const auto& transform : batchData.transforms )
+                // Convert batch to instanced rendering
+                std::vector<InstanceData> instances;
+                instances.reserve( batchData.m_transforms.size() );
+                for ( const auto& transform : batchData.m_transforms )
                 {
-                    materialKey.shader->setMat4( "uTransform", transform );
-
-                    glDrawElements( GL_TRIANGLES,
-                                    vertexArray->getIndexBuffer()->getCount(),
-                                    GL_UNSIGNED_INT,
-                                    nullptr );
+                    instances.emplace_back( InstanceData{transform} );
                 }
+
+                drawInstanced( materialKey.m_shader,
+                               materialKey.m_material,
+                               vertexArray,
+                               instances,
+                               p_viewProjection,
+                               true );
             }
         }
 
@@ -73,11 +79,11 @@ namespace Tomos
 
         MaterialBatchKey key{p_shader, p_material};
         auto&            batchData = g_batches[key][p_vertexArray];
-        if ( !batchData.vertexArray )
+        if ( !batchData.m_vertexArray )
         {
-            batchData.vertexArray = p_vertexArray;
+            batchData.m_vertexArray = p_vertexArray;
         }
-        batchData.transforms.push_back( p_transform );
+        batchData.m_transforms.push_back( p_transform );
     }
 
     void Renderer::draw( const std::shared_ptr<Shader>&      p_shader,
@@ -118,13 +124,76 @@ namespace Tomos
         }
     }
 
-    void Renderer::beginFrameBufferRender( const std::shared_ptr<FrameBuffer>& framebuffer )
+    void Renderer::drawInstanced( const std::shared_ptr<Shader>&      p_shader,
+                                  const std::shared_ptr<Material>&    p_material,
+                                  const std::shared_ptr<VertexArray>& p_vertexArray,
+                                  const std::vector<InstanceData>&    p_instances,
+                                  const glm::mat4&                    p_viewProjection,
+                                  bool                                p_batched
+            )
     {
-        if ( framebuffer )
+        if ( !p_vertexArray || !p_vertexArray->getIndexBuffer() )
         {
-            framebuffer->bind();
-            glClearColor( 0.0f, 0.0f, 0.0f, 0.0f ); // Clear with transparent black
-            glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+            LOG_ERROR() << "Invalid VertexArray or IndexBuffer";
+            return;
+        }
+
+        if ( !p_batched )
+        {
+            p_shader->bind();
+            p_material->bind();
+        }
+
+        p_shader->setMat4( "uViewProjection", p_viewProjection );
+
+        p_vertexArray->bind();
+
+        size_t instanceCount  = p_instances.size();
+        size_t instancesDrawn = 0;
+
+        auto maxInstances = Application::getState().config().get<size_t>( "maxInstancesPerDraw" );
+
+        while ( instancesDrawn < instanceCount )
+        {
+            size_t batchSize = std::min( maxInstances, instanceCount - instancesDrawn );
+
+            auto& instanceBuffer = g_instanceBuffers[p_vertexArray];
+            if ( !instanceBuffer || instanceBuffer->getSize() < sizeof( InstanceData ) * maxInstances )
+            {
+                instanceBuffer = std::make_shared<StorageBuffer>( sizeof( InstanceData ) * maxInstances );
+            }
+
+            instanceBuffer->setData(
+                    p_instances.data() + instancesDrawn,
+                    sizeof( InstanceData ) * batchSize
+                    );
+
+            instanceBuffer->bindBase( 0 ); // Binding point 0
+
+            glDrawElementsInstanced(
+                    GL_TRIANGLES,
+                    p_vertexArray->getIndexBuffer()->getCount(),
+                    GL_UNSIGNED_INT,
+                    nullptr,
+                    static_cast<GLsizei>( batchSize )
+                    );
+
+            instancesDrawn += batchSize;
+        }
+
+        // Error checking
+        GLenum err;
+        while ( ( err = glGetError() ) != GL_NO_ERROR )
+        {
+            LOG_ERROR() << "OpenGL error: " << err;
+        }
+    }
+
+    void Renderer::beginFrameBufferRender( const std::shared_ptr<FrameBuffer>& p_framebuffer )
+    {
+        if ( p_framebuffer )
+        {
+            p_framebuffer->bind();
         }
     }
 
@@ -133,10 +202,10 @@ namespace Tomos
         glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     }
 
-    void Renderer::renderFrameBuffer( const std::shared_ptr<FrameBuffer>& framebuffer,
-                                      const std::shared_ptr<Shader>&      postProcessShader )
+    void Renderer::renderFrameBuffer( const std::shared_ptr<FrameBuffer>& p_framebuffer,
+                                      const std::shared_ptr<Shader>&      p_postProcessShader )
     {
-        if ( !framebuffer ) return;
+        if ( !p_framebuffer ) return;
 
         glDisable( GL_DEPTH_TEST );
         glEnable( GL_BLEND );
@@ -167,7 +236,7 @@ namespace Tomos
         }
 
         // Use default shader if none provided
-        auto shaderToUse = postProcessShader ? postProcessShader : g_defaultPostProcessShader;
+        auto shaderToUse = p_postProcessShader ? p_postProcessShader : g_defaultPostProcessShader;
         if ( !shaderToUse )
         {
             // Create default post-process shader if not exists
@@ -179,7 +248,7 @@ namespace Tomos
         }
 
         shaderToUse->bind();
-        framebuffer->getColorTexture()->bind( 0 );
+        p_framebuffer->getColorTexture()->bind( 0 );
         shaderToUse->setInt( "uScreenTexture", 0 );
 
         g_screenQuadVAO->bind();

@@ -4,6 +4,8 @@
 
 #include "Ecs.hh"
 
+#include "Application.hh"
+
 namespace Tomos
 {
     int ECS::registerComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
@@ -69,16 +71,18 @@ namespace Tomos
     // TODO: this sould be done in a more efficient way
     void ECS::updateLayerComponents()
     {
+        auto unassignedLayer = Application::getState().config().get<int>( "unassignedLayerId" );
+
         for ( auto& [_, system] : m_systems )
         {
             // First collect all components that need to be moved
             std::vector<std::pair<std::shared_ptr<Component>, std::shared_ptr<Node>>> toMove;
 
-            auto& unassignedComponents = system->getComponents()[UNASSIGNED_LAYER_ID];
+            auto& unassignedComponents = system->getComponents()[unassignedLayer];
             for ( auto it = unassignedComponents.begin(); it != unassignedComponents.end(); )
             {
                 auto& [component, node] = *it;
-                if ( node->getLayerId() != UNASSIGNED_LAYER_ID )
+                if ( node->getLayerId() != unassignedLayer )
                 {
                     toMove.emplace_back( component, node );
                     it = unassignedComponents.erase( it ); // Safe erase while iterating

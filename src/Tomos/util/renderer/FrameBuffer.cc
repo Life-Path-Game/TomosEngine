@@ -7,9 +7,9 @@
 
 namespace Tomos
 {
-    FrameBuffer::FrameBuffer( unsigned int  width, unsigned int        height,
-                              TextureFormat colorFormat, TextureFormat depthFormat ) :
-        m_size( width, height ), m_colorFormat( colorFormat ), m_depthFormat( depthFormat )
+    FrameBuffer::FrameBuffer( unsigned int  p_width, unsigned int        p_height,
+                              TextureFormat p_colorFormat, TextureFormat p_depthFormat ) :
+        m_size( p_width, p_height ), m_colorFormat( p_colorFormat ), m_depthFormat( p_depthFormat )
     {
         initialize();
     }
@@ -79,11 +79,11 @@ namespace Tomos
         glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     }
 
-    void FrameBuffer::resize( unsigned int width, unsigned int height )
+    void FrameBuffer::resize( unsigned int p_width, unsigned int p_height )
     {
-        if ( width == m_size.x && height == m_size.y ) return;
+        if ( p_width == m_size.x && p_height == m_size.y ) return;
 
-        m_size = {width, height};
+        m_size = {p_width, p_height};
 
         // Resize textures
         m_colorTexture->resize( m_size );

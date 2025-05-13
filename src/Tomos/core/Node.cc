@@ -10,6 +10,7 @@ namespace Tomos
     Node::Node( const std::string& p_name ) :
         m_name( p_name )
     {
+        m_layerId = Application::getState().config().get<int>( "unassignedLayerId" );
     }
 
     void Node::addChild( const std::shared_ptr<Node>& p_child )
@@ -68,7 +69,7 @@ namespace Tomos
 
     void Node::addComponent( const std::shared_ptr<Component>& p_component )
     {
-        int res = Application::getState().m_ecs.registerComponent( p_component, shared_from_this() );
+        int res = Application::getState().ecs().registerComponent( p_component, shared_from_this() );
         if ( res != 0 )
         {
             LOG_WARN() << "Failed to register component";
@@ -81,7 +82,7 @@ namespace Tomos
 
     void Node::removeComponent( const std::shared_ptr<Component>& p_component )
     {
-        int res = Application::getState().m_ecs.destroyComponent( p_component, shared_from_this() );
+        int res = Application::getState().ecs().destroyComponent( p_component, shared_from_this() );
         if ( res != 0 )
         {
             LOG_WARN() << "Failed to destroy component";

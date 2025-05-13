@@ -7,6 +7,7 @@
 #include "Tomos/events/Event.hh"
 #include "Tomos/util/renderer/FrameBuffer.hh"
 #include "Tomos/util/renderer/Shader.hh"
+#include "Tomos/util/renderer/passes/RenderPass.hh"
 
 namespace Tomos
 {
@@ -37,13 +38,18 @@ namespace Tomos
         {
         }
 
+        void onResize( int p_width, int p_height );
+
         inline const std::string& getName() const { return m_name; }
 
         inline SceneManager& getSceneManager() { return m_sceneManager; }
 
         int getLayerId() const { return m_layerId; }
 
-        inline const std::shared_ptr<FrameBuffer>& getFrameBuffer() const { return m_frameBuffer; }
+        void                                            addRenderPass( std::unique_ptr<RenderPass> p_pass );
+        const std::vector<std::unique_ptr<RenderPass>>& getRenderPasses() const;
+
+        std::shared_ptr<FrameBuffer> getLayerFramebuffer() const { return m_layerFramebuffer; }
 
         inline const std::shared_ptr<Shader>& getShader() const { return m_shader; }
         void                                  setShader( const std::shared_ptr<Shader>& p_shader ) { m_shader = p_shader; }
@@ -61,8 +67,9 @@ namespace Tomos
 
         SceneManager m_sceneManager;
 
-        std::shared_ptr<FrameBuffer> m_frameBuffer = nullptr;
-        std::shared_ptr<Shader>      m_shader      = nullptr;
+        std::vector<std::unique_ptr<RenderPass>> m_passes;
+        std::shared_ptr<FrameBuffer>             m_layerFramebuffer;
+        std::shared_ptr<Shader>                  m_shader;
     };
 
     class LayerStack

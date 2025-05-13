@@ -100,7 +100,10 @@ add_library(${PROJECT_NAME} STATIC
         src/Tomos/util/renderer/FrameBuffer.hh
         src/Tomos/core/Scene.cc
         src/Tomos/core/Scene.hh
-        src/Tomos/util/Defs.hh
+        src/Tomos/util/conf/Config.hh
+        src/Tomos/util/renderer/passes/RenderPass.hh
+        src/Tomos/util/renderer/passes/mesh/GeometryPass.cc
+        src/Tomos/util/renderer/passes/mesh/GeometryPass.hh
 
 )
 

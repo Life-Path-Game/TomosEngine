@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 
 // Material properties as uniforms instead of UBO
 uniform vec4 uBaseFactor;

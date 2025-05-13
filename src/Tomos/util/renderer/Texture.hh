@@ -67,6 +67,8 @@ namespace Tomos
 
         ~Texture();
 
+        void cleanup();
+
         void bind( GLuint p_unit ) const;
 
         static void unbind( GLuint p_unit );

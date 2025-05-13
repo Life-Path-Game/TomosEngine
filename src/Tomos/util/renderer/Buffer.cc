@@ -83,4 +83,46 @@ namespace Tomos
         LOG_DEBUG() << "Unbinding index buffer";
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
     }
+
+    StorageBuffer::StorageBuffer( unsigned int p_size, GLenum p_usage ) :
+        m_size( p_size )
+    {
+        glCreateBuffers( 1, &m_rendererId );
+        glNamedBufferData( m_rendererId, p_size, nullptr, p_usage );
+    }
+
+    StorageBuffer::~StorageBuffer()
+    {
+        glDeleteBuffers( 1, &m_rendererId );
+    }
+
+    void StorageBuffer::bind() const
+    {
+        glBindBuffer( GL_SHADER_STORAGE_BUFFER, m_rendererId );
+    }
+
+    void StorageBuffer::unbind() const
+    {
+        glBindBuffer( GL_SHADER_STORAGE_BUFFER, 0 );
+    }
+
+    void StorageBuffer::bindBase( unsigned int p_bindingPoint ) const
+    {
+        glBindBufferBase( GL_SHADER_STORAGE_BUFFER, p_bindingPoint, m_rendererId );
+    }
+
+    void StorageBuffer::setData( const void* p_data, unsigned int p_size, unsigned int p_offset )
+    {
+        glNamedBufferSubData( m_rendererId, p_offset, p_size, p_data );
+    }
+
+    void* StorageBuffer::map( GLenum p_access )
+    {
+        return glMapNamedBuffer( m_rendererId, p_access );
+    }
+
+    void StorageBuffer::unmap()
+    {
+        glUnmapNamedBuffer( m_rendererId );
+    }
 } // Tomos

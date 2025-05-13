@@ -132,4 +132,11 @@ namespace Tomos
     VertexArray::~VertexArray()
     {
     }
+
+    void VertexArray::setInstanceBuffer( const std::shared_ptr<StorageBuffer>& p_instanceBuffer, unsigned int p_bindingPoint )
+    {
+        bind();
+        p_instanceBuffer->bindBase( p_bindingPoint );
+        m_instanceBuffer = p_instanceBuffer;
+    }
 } // Tomos

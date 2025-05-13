@@ -29,10 +29,7 @@ namespace Tomos
 
     Application* Application::get()
     {
-        if ( g_instance == nullptr )
-        {
-            g_instance = new Application();
-        }
+        LOG_ASSERT_MSG( g_instance, "Application is not initialized!" );
 
         return g_instance;
     }
@@ -57,37 +54,54 @@ namespace Tomos
         {
             // Time update
             auto currentTime = ( float ) glfwGetTime();
-            getState().m_time.update( currentTime );
+            getState().time().update( currentTime );
 
-            getState().m_ecs.updateLayerComponents();
+            getState().ecs().updateLayerComponents();
 
-            for ( auto& layer : getState().m_layerStack )
+            for ( auto& layer : getState().layerStack() )
             {
-                // Bind layer framebuffer
-                Renderer::beginFrameBufferRender( layer->getFrameBuffer() );
-
                 // Layer specific ECS update
-                getState().m_ecs.earlyUpdate( layer->getLayerId() );
-                getState().m_ecs.update( layer->getLayerId() );
+                getState().ecs().earlyUpdate( layer->getLayerId() );
+                getState().ecs().update( layer->getLayerId() );
 
                 // Layer specific fixed time step ECS update
-                getState().m_ecs.updateFixedTimeStep( getState().m_time.deltaTime(), layer->getLayerId() );
+                getState().ecs().updateFixedTimeStep( getState().time().deltaTime(), layer->getLayerId() );
 
                 // Layer specific update
                 layer->onUpdate();
 
                 // Layer specific late ECS update
-                getState().m_ecs.lateUpdate( layer->getLayerId() );
+                getState().ecs().lateUpdate( layer->getLayerId() );
 
-                Renderer::endFrameBufferRender();
+                for ( auto& pass : layer->getRenderPasses() )
+                {
+                    pass->apply( layer->getLayerId(), getState().ecs().getSystem<CameraSystem>().getViewProjectionMat( layer->getLayerId() ) );
+
+                    // Composite this pass's output to layer's main FB
+                    if ( auto passOutput = pass->getOutput() )
+                    {
+                        Renderer::beginFrameBufferRender( layer->getLayerFramebuffer() );
+                        Renderer::setClearedColor( glm::vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+                        Renderer::clear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+                        Renderer::renderFrameBuffer(
+                                passOutput,
+                                pass->getShader()
+                                );
+
+                        Renderer::endFrameBufferRender();
+                    }
+                }
             }
 
             // Second pass: Composite all layers
+            Renderer::beginFrameBufferRender( nullptr );
+            Renderer::setClearedColor( glm::vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
             Renderer::clear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-            for ( auto& layer : getState().m_layerStack )
+            for ( auto& layer : getState().layerStack() )
             {
-                Renderer::renderFrameBuffer( layer->getFrameBuffer(), layer->getShader() );
+                Renderer::renderFrameBuffer( layer->getLayerFramebuffer(), layer->getShader() );
             }
 
             // Window update
@@ -124,16 +138,16 @@ namespace Tomos
                     }
 
                     // Resize all framebuffers
-                    for ( auto& layer : getState().m_layerStack )
+                    for ( auto& layer : getState().layerStack() )
                     {
-                        layer->getFrameBuffer()->resize( viewportWidth, viewportHeight );
+                        layer->onResize( e.getWidth(), e.getHeight() );
                     }
 
                     glViewport( offsetX, offsetY, viewportWidth, viewportHeight );
                     return false;
                 } );
 
-        for ( auto it = getState().m_layerStack.end(); it != getState().m_layerStack.begin(); )
+        for ( auto it = getState().layerStack().end(); it != getState().layerStack().begin(); )
         {
             ( *--it )->onEvent( p_e );
             if ( p_e.isHandled() )
@@ -153,13 +167,13 @@ namespace Tomos
 
     void Application::pushLayer( Layer* p_layer )
     {
-        getState().m_layerStack.pushLayer( p_layer );
+        getState().layerStack().pushLayer( p_layer );
         p_layer->onAttach();
     }
 
     void Application::pushOverlay( Layer* p_overlay )
     {
-        getState().m_layerStack.pushOverlay( p_overlay );
+        getState().layerStack().pushOverlay( p_overlay );
         p_overlay->onAttach();
     }
 } // namespace Tomos

@@ -9,7 +9,6 @@
 #include <set>
 
 #include "Tomos/systems/Component.hh"
-#include "Tomos/util/Defs.hh"
 #include "Tomos/util/transform/Transform.hh"
 
 namespace Tomos
@@ -61,7 +60,7 @@ namespace Tomos
 
         bool m_active = false;
         // start as unassigned
-        int m_layerId = UNASSIGNED_LAYER_ID;
+        int m_layerId;
     };
 
     static void updateTransforms( Node* node )

@@ -6,7 +6,6 @@
 
 #include "Tomos/core/Application.hh"
 #include "Tomos/systems/camera/CameraSystem.hh"
-#include "Tomos/util/renderer/Renderer.hh"
 
 namespace Tomos
 {
@@ -29,7 +28,7 @@ namespace Tomos
     void MeshSystem::lateUpdate( int p_layerId )
     {
         // Get view projection matrix once
-        auto sys = Application::getState().m_ecs.getSystem<CameraSystem>();
+        auto sys      = Application::getState().ecs().getSystem<CameraSystem>();
         auto viewProj = sys.getViewProjectionMat( p_layerId );
 
         if ( !m_components.contains( p_layerId ) )
@@ -37,8 +36,7 @@ namespace Tomos
             return;
         }
 
-        // Start batch
-        Renderer::beginBatch();
+        m_drawCalls[p_layerId].clear();
 
         for ( auto& [component, node] : m_components[p_layerId] )
         {
@@ -50,14 +48,25 @@ namespace Tomos
 
             if ( mesh && material )
             {
-                Renderer::addToBatch( mesh->getShader(),
-                                      material,
-                                      mesh->getVertexArray(),
-                                      node->m_transform.m_globMat );
+                m_drawCalls[p_layerId].push_back( {
+                        mesh->getShader(),
+                        material,
+                        mesh->getVertexArray(),
+                        node->m_transform.m_globMat
+                } );
             }
         }
+    }
 
-        // End batch and render everything
-        Renderer::endBatch( viewProj );
+    const std::vector<MeshSystem::DrawCall>& MeshSystem::getDrawCalls( int layerId ) const
+    {
+        static const std::vector<DrawCall> empty;
+        auto                               it = m_drawCalls.find( layerId );
+        return it != m_drawCalls.end() ? it->second : empty;
+    }
+
+    void MeshSystem::clearDrawCalls( int layerId )
+    {
+        m_drawCalls[layerId].clear();
     }
 } // Tomos
