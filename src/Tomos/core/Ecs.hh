@@ -3,42 +3,85 @@
 #include <memory>
 #include <unordered_map>
 
+#include "Node.hh"
 #include "Tomos/systems/System.hh"
 #include "Tomos/util/logger/Logger.hh"
-#include "Node.hh"
 
 namespace Tomos
 {
     class ECS
     {
     public:
-        // Type of system
+        // Leave layer id -1 for systems that don't need to be in a specific layer and will be global
         template<typename T>
         void registerSystem()
         {
-            systems[typeid( T )] = std::make_unique<T>();
+            bool isBase = std::is_base_of_v<System, T>;
+            LOG_ASSERT( isBase );
+
+            if ( m_systems.contains( typeid( T ) ) )
+            {
+                LOG_ERROR() << "System already registered: " << typeid( T ).name();
+                return;
+            }
+
+            m_systems[typeid( T )] = std::make_unique<T>();
+            LOG_INFO() << "System registered: " << typeid( T ).name();
         }
 
-        void registerComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node );
-        void destroyComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node );
+        template<typename T>
+        void registerFixedTimeStepSystem( float p_fixedTimeStep = 0.01f )
+        {
+            bool isBase = std::is_base_of_v<FixedTimeStepSystem, T>;
+            LOG_ASSERT( isBase );
 
-        void earlyUpdate();
-        void update();
-        void lateUpdate();
+            if ( m_fixedTimeStepSystems.contains( typeid( T ) ) )
+            {
+                LOG_ERROR() << "Fixed time step system already registered: " << typeid( T ).name();
+                return;
+            }
+
+            m_fixedTimeStepSystems[typeid( T )] = std::make_unique<T>( p_fixedTimeStep );
+            LOG_INFO() << "Fixed time step system registered: " << typeid( T ).name();
+        }
+
+        int registerComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node );
+        int destroyComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node );
+
+        void updateLayerComponents();
+
+        void earlyUpdate( int p_layerId );
+        void update( int p_layerId );
+        void lateUpdate( int p_layerId );
+
+        void updateFixedTimeStep( float p_deltaTime, int p_layerId );
 
         template<typename T>
         T& getSystem()
         {
             std::type_index type = typeid( T );
 
-            if ( systems.find( type ) == systems.end() )
+            if ( m_systems.find( type ) == m_systems.end() )
             {
                 LOG_ERROR() << "System not found: " << type.name();
             }
-            return *static_cast<T*>( systems[type].get() );
+            return *static_cast<T*>( m_systems[type].get() );
+        }
+
+        template<typename T>
+        T& getFixedTimeStepSystem()
+        {
+            std::type_index type = typeid( T );
+
+            if ( m_fixedTimeStepSystems.find( type ) == m_fixedTimeStepSystems.end() )
+            {
+                LOG_ERROR() << "Fixed time step system not found: " << type.name();
+            }
+            return *static_cast<T*>( m_fixedTimeStepSystems[type].get() );
         }
 
     private:
-        std::unordered_map<std::type_index, std::unique_ptr<System>> systems;
+        std::unordered_map<std::type_index, std::unique_ptr<System>>              m_systems;
+        std::unordered_map<std::type_index, std::unique_ptr<FixedTimeStepSystem>> m_fixedTimeStepSystems;
     };
 } // namespace Tomos

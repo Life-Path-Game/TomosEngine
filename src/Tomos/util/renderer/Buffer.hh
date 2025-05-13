@@ -164,13 +164,15 @@ namespace Tomos
 
         void                setLayout( const BufferLayout& p_layout ) { m_layout = p_layout; }
         const BufferLayout& getLayout() const { return m_layout; }
+        unsigned int        getSize() const { return m_size; }
 
-        VertexBuffer( const float* p_verticies, unsigned int p_size );
+        VertexBuffer( const float* p_verticies, unsigned int p_size, GLenum p_usage = GL_STATIC_DRAW );
         ~VertexBuffer();
 
     private:
         unsigned int m_rendererId{};
         BufferLayout m_layout;
+        unsigned int m_size{};
     };
 
     class IndexBuffer
@@ -179,7 +181,7 @@ namespace Tomos
         void bind() const;
         void unbind() const;
 
-        IndexBuffer( const unsigned int* p_indicies, unsigned int p_count );
+        IndexBuffer( const unsigned int* p_indicies, unsigned int p_count, GLenum p_usage = GL_STATIC_DRAW );
         ~IndexBuffer();
 
         unsigned int getCount() const { return m_count; }
@@ -187,5 +189,26 @@ namespace Tomos
     private:
         unsigned int m_rendererId{};
         unsigned int m_count;
+    };
+
+    class StorageBuffer
+    {
+    public:
+        StorageBuffer( unsigned int p_size, GLenum p_usage = GL_DYNAMIC_DRAW );
+        ~StorageBuffer();
+
+        void bind() const;
+        void unbind() const;
+        void bindBase( unsigned int p_bindingPoint ) const;
+
+        void  setData( const void* p_data, unsigned int p_size, unsigned int p_offset = 0 );
+        void* map( GLenum p_access = GL_WRITE_ONLY );
+        void  unmap();
+
+        unsigned int getSize() const { return m_size; }
+
+    private:
+        unsigned int m_rendererId{};
+        unsigned int m_size{};
     };
 } // Tomos

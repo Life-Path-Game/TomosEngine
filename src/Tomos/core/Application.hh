@@ -1,35 +1,45 @@
 #pragma once
-
 #include <memory>
 
-#include "Tomos/util/input/Input.hh"
 #include "Ecs.hh"
 #include "Layer.hh"
-#include "Window.hh"
+#include "Tomos/util/input/Input.hh"
 #include "Tomos/util/time/Time.hh"
+#include "Window.hh"
+#include "Tomos/util/conf/Config.hh"
 
 namespace Tomos
 {
     class WindowCloseEvent;
     class Application;
 
-    class State
+    struct State
     {
-        friend class Application;
-
     public:
-        ECS        m_ecs;
-        LayerStack m_layerStack;
-        Input      m_input;
-        Time       m_time;
+        State() = default;
 
-        float m_aspectRatio = 1;
+        ECS&           ecs() { return m_ecs; }
+        LayerStack&    layerStack() { return m_layerStack; }
+        Input&         input() { return m_input; }
+        Time&          time() { return m_time; }
+        ConfigManager& config() { return m_config; }
+
+    private:
+        ECS m_ecs;
+
+        LayerStack m_layerStack;
+
+        Input m_input;
+        Time  m_time;
+
+        ConfigManager m_config;
     };
 
     class Application
     {
     public:
         static Application* get();
+        static void         init( const WindowProps& p_props = WindowProps() );
 
         void run();
 
@@ -38,14 +48,25 @@ namespace Tomos
 
         Window& getWindow() const;
 
-        State& getState() { return m_state; }
+        static State& getState()
+        {
+            LOG_ASSERT_MSG( g_instance,
+                            "Application is not initialized!" );
 
-        void PushLayer( Layer* p_layer );
-        void PushOverlay( Layer* p_overlay );
+            return g_instance->m_state;
+        }
+
+        void pushLayer( Layer* p_layer );
+        void pushOverlay( Layer* p_overlay );
 
     private:
-        Application();
-        ~Application()                               = default;
+        Application( const WindowProps& p_props = WindowProps() );
+
+        ~Application()
+        {
+            delete g_instance;
+        };
+
         Application( const Application& )            = delete;
         Application& operator=( const Application& ) = delete;
 

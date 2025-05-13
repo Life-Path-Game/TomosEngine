@@ -8,7 +8,6 @@
 
 namespace Tomos
 {
-
     bool Input::isKeyDown( int p_keycode )
     {
         auto state = glfwGetKey( Application::get()->getWindow().getNativeWindow(), p_keycode );
@@ -50,7 +49,24 @@ namespace Tomos
         double x, y;
         glfwGetCursorPos( Application::get()->getWindow().getNativeWindow(), &x, &y );
 
-        return { x, y };
+        return {x, y};
     }
 
-}  // namespace Tomos
+    std::pair<double, double> Input::getMouseDelta()
+    {
+        if ( m_firstMouseMove )
+        {
+            m_mousePosOld    = getMousePos();
+            m_firstMouseMove = false;
+        }
+
+        auto current = getMousePos();
+        auto delta   = std::make_pair(
+                current.first - m_mousePosOld.first,
+                current.second - m_mousePosOld.second
+                );
+        m_mousePosOld = current; // Update for next call
+
+        return delta;
+    }
+} // namespace Tomos

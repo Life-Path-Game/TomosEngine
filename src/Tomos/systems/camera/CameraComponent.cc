@@ -50,15 +50,15 @@ namespace Tomos
 
     void CameraComponent::recompute()
     {
-        m_projection    = glm::perspective( glm::radians( m_fov ), Application::get()->getState().m_aspectRatio, m_near, m_far );
-        m_aspectRatio   = Application::get()->getState().m_aspectRatio;
+        m_projection    = glm::perspective( glm::radians( m_fov ), Application::get()->getWindow().getData().m_aspectRatio, m_near, m_far );
+        m_aspectRatio   = Application::get()->getWindow().getData().m_aspectRatio;
         m_invProjection = glm::inverse( m_projection );
         m_dirty         = false;
     }
 
     glm::mat4 CameraComponent::getProjection()
     {
-        if ( m_dirty || Application::get()->getState().m_aspectRatio != m_aspectRatio )
+        if ( m_dirty || Application::get()->getWindow().getData().m_aspectRatio != m_aspectRatio )
         {
             recompute();
         }
@@ -67,10 +67,10 @@ namespace Tomos
 
     glm::mat4 CameraComponent::getInvProjection()
     {
-        if ( m_dirty || Application::get()->getState().m_aspectRatio != m_aspectRatio )
+        if ( m_dirty || Application::get()->getWindow().getData().m_aspectRatio != m_aspectRatio )
         {
             recompute();
         }
         return m_invProjection;
     }
-} // namespace Tomos
+}  // namespace Tomos

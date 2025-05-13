@@ -10,5 +10,4 @@ namespace Tomos
 
         std::string m_name{};
     };
-
-}  // namespace Tomos
+} // namespace Tomos

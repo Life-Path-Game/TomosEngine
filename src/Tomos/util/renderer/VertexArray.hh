@@ -9,6 +9,8 @@ namespace Tomos
 {
     class VertexArray
     {
+        friend class Renderer;
+
     public:
         void bind() const;
         void unbind() const;
@@ -23,8 +25,13 @@ namespace Tomos
         ~VertexArray();
 
     private:
+        void                                  setInstanceBuffer( const std::shared_ptr<StorageBuffer>& p_instanceBuffer, unsigned int p_bindingPoint );
+        const std::shared_ptr<StorageBuffer>& getInstanceBuffer() const { return m_instanceBuffer; }
+
+        unsigned int                               m_vertexBufferIndex = 0;
         std::vector<std::shared_ptr<VertexBuffer>> m_vertexBuffers;
         std::shared_ptr<IndexBuffer>               m_indexBuffer;
+        std::shared_ptr<StorageBuffer>             m_instanceBuffer;
 
         unsigned int m_rendererId{};
     };

@@ -22,6 +22,10 @@ MacOS as well.
 - Cross-platform support (Windows, Linux, MacOS)
 - more...
 
+## Dependencies
+
+Refer to the CMakeLists.txt file for the most up-to-date list of dependencies. :)
+
 ## Building
 
 ```bash

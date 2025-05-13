@@ -4,62 +4,132 @@
 
 #include "Ecs.hh"
 
+#include "Application.hh"
+
 namespace Tomos
 {
-    void ECS::registerComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
+    int ECS::registerComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
     {
         LOG_DEBUG() << "Start";
         auto t = typeid( *p_component ).hash_code();
-        for ( auto& [_, system] : systems )
+
+        for ( auto& [_, system] : m_systems )
         {
             if ( system->getComponentType().hash_code() == t )
             {
                 system->componentAdded( p_component, p_node );
                 LOG_DEBUG() << "End";
-                return;
+                return 0;
             }
         }
-        LOG_WARN() << "No system found for component: " << p_component->m_name;
+
+        for ( auto& [_, system] : m_fixedTimeStepSystems )
+        {
+            if ( system->getComponentType().hash_code() == t )
+            {
+                system->componentAdded( p_component, p_node );
+                LOG_DEBUG() << "End";
+                return 0;
+            }
+        }
+
+        LOG_WARN() << "End: No system found for component: " << p_component->m_name;
+        return -1;
     }
 
-    void ECS::destroyComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
+    int ECS::destroyComponent( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
     {
         LOG_DEBUG() << "Start";
         auto t = typeid( *p_component ).hash_code();
-        for ( auto& [_, system] : systems )
+
+        for ( auto& [_, system] : m_systems )
         {
             if ( system->getComponentType().hash_code() == t )
             {
                 system->componentRemoved( p_component, p_node );
                 LOG_DEBUG() << "End";
-                return;
+                return 0;
             }
         }
+
+        for ( auto& [_, system] : m_fixedTimeStepSystems )
+        {
+            if ( system->getComponentType().hash_code() == t )
+            {
+                system->componentRemoved( p_component, p_node );
+                LOG_DEBUG() << "End";
+                return 0;
+            }
+        }
+
         LOG_WARN() << "No system found for component: " << p_component->m_name;
+
+        return -1;
     }
 
-
-    void ECS::earlyUpdate()
+    // Cleanup function to move components to their assigned layer after creation
+    // TODO: this sould be done in a more efficient way
+    void ECS::updateLayerComponents()
     {
-        for ( auto& [_, system] : systems )
+        auto unassignedLayer = Application::getState().config().get<int>( "unassignedLayerId" );
+
+        for ( auto& [_, system] : m_systems )
         {
-            system->earlyUpdate();
+            // First collect all components that need to be moved
+            std::vector<std::pair<std::shared_ptr<Component>, std::shared_ptr<Node>>> toMove;
+
+            auto& unassignedComponents = system->getComponents()[unassignedLayer];
+            for ( auto it = unassignedComponents.begin(); it != unassignedComponents.end(); )
+            {
+                auto& [component, node] = *it;
+                if ( node->getLayerId() != unassignedLayer )
+                {
+                    toMove.emplace_back( component, node );
+                    it = unassignedComponents.erase( it ); // Safe erase while iterating
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
+            // Then move them to their new layers
+            for ( auto& [component, node] : toMove )
+            {
+                system->m_components[node->getLayerId()][component] = node;
+            }
         }
     }
 
-    void ECS::update()
+    void ECS::earlyUpdate( int p_layerId )
     {
-        for ( auto& [_, system] : systems )
+        for ( auto& [_, system] : m_systems )
         {
-            system->update();
+            system->earlyUpdate( p_layerId );
         }
     }
 
-    void ECS::lateUpdate()
+    void ECS::update( int p_layerId )
     {
-        for ( auto& [_, system] : systems )
+        for ( auto& [_, system] : m_systems )
         {
-            system->lateUpdate();
+            system->update( p_layerId );
+        }
+    }
+
+    void ECS::lateUpdate( int p_layerId )
+    {
+        for ( auto& [_, system] : m_systems )
+        {
+            system->lateUpdate( p_layerId );
+        }
+    }
+
+    void ECS::updateFixedTimeStep( float p_deltaTime, int p_layerId )
+    {
+        for ( auto& [_, system] : m_fixedTimeStepSystems )
+        {
+            system->update( p_deltaTime, p_layerId );
         }
     }
 } // namespace Tomos

@@ -160,5 +160,11 @@ CheckOptions:
   - key: readability-identifier-naming.ParameterPrefix
     value: p_
 
+  # Global variables (prefix: g_)
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: camelBack
+  - key: readability-identifier-naming.GlobalVariablePrefix
+    value: g_
+
   - key: readability-identifier-naming.VariableCase
     value: camelBack

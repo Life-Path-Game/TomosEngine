@@ -9,7 +9,6 @@
 #include <set>
 
 #include "Tomos/systems/Component.hh"
-#include "Tomos/util/logger/Logger.hh"
 #include "Tomos/util/transform/Transform.hh"
 
 namespace Tomos
@@ -27,6 +26,8 @@ namespace Tomos
 
         void addComponent( const std::shared_ptr<Component>& p_component );
         void removeComponent( const std::shared_ptr<Component>& p_component );
+
+        const std::vector<std::shared_ptr<Component>>& getComponents() const { return m_components; }
 
         bool isInScene() const;
 
@@ -50,12 +51,16 @@ namespace Tomos
         void setActive( bool p_active );
         bool isActive() const { return m_active; }
 
+        int getLayerId() const { return m_layerId; }
+
     protected:
-        std::weak_ptr<Node>                     m_parent{};
+        Node*                                   m_parent = nullptr;
         std::set<std::shared_ptr<Node>>         m_children;
         std::vector<std::shared_ptr<Component>> m_components;
 
-        bool m_active = true;
+        bool m_active = false;
+        // start as unassigned
+        int m_layerId;
     };
 
     static void updateTransforms( Node* node )
@@ -70,9 +75,10 @@ namespace Tomos
     class SceneNode : public Node
     {
     public:
-        explicit SceneNode( const std::string& p_name = "SceneNode" ) :
+        explicit SceneNode( int p_layerId, const std::string& p_name = "SceneNode" ) :
             Node( p_name )
         {
+            m_layerId = p_layerId;
         }
 
         void computeTransforms() { updateTransforms( this ); }

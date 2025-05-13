@@ -3,6 +3,7 @@
 //
 
 #include "Application.hh"
+
 #include <glm/glm.hpp>
 
 #include "Tomos/events/application/ApplicationEvent.hh"
@@ -15,49 +16,95 @@ namespace Tomos
 {
     Application* Application::g_instance = nullptr;
 
-    Application::Application()
+    Application::Application( const WindowProps& p_props )
     {
         LOG_INFO() << "Tomos Engine";
         LOG_INFO() << "By dstuden";
         LOG_INFO() << "Initializing Application";
 
-        m_window = std::make_unique<Window>( WindowProps() );
+        m_window = std::make_unique<Window>( p_props );
 
         m_window->setEventCallback( [this]( Event& e ) { onEvent( e ); } );
     }
 
     Application* Application::get()
     {
-        if ( g_instance == nullptr )
-        {
-            g_instance = new Application();
-        }
+        LOG_ASSERT_MSG( g_instance, "Application is not initialized!" );
 
         return g_instance;
+    }
+
+    void Application::init( const WindowProps& p_props )
+    {
+        if ( g_instance == nullptr )
+        {
+            g_instance = new Application( p_props );
+        }
+        else
+        {
+            LOG_ERROR() << "Application already exists!";
+        }
     }
 
     void Application::run()
     {
         LOG_DEBUG() << "Start";
 
-        glEnable( GL_DEPTH_TEST );
-
         while ( m_running )
         {
+            // Time update
             auto currentTime = ( float ) glfwGetTime();
-            getState().m_time.update( currentTime );
+            getState().time().update( currentTime );
 
-            getState().m_ecs.earlyUpdate();
-            getState().m_ecs.update();
+            getState().ecs().updateLayerComponents();
 
-            for ( auto& layer : getState().m_layerStack )
+            for ( auto& layer : getState().layerStack() )
             {
+                // Layer specific ECS update
+                getState().ecs().earlyUpdate( layer->getLayerId() );
+                getState().ecs().update( layer->getLayerId() );
+
+                // Layer specific fixed time step ECS update
+                getState().ecs().updateFixedTimeStep( getState().time().deltaTime(), layer->getLayerId() );
+
+                // Layer specific update
                 layer->onUpdate();
+
+                // Layer specific late ECS update
+                getState().ecs().lateUpdate( layer->getLayerId() );
+
+                for ( auto& pass : layer->getRenderPasses() )
+                {
+                    pass->apply( layer->getLayerId(), getState().ecs().getSystem<CameraSystem>().getViewProjectionMat( layer->getLayerId() ) );
+
+                    // Composite this pass's output to layer's main FB
+                    if ( auto passOutput = pass->getOutput() )
+                    {
+                        Renderer::beginFrameBufferRender( layer->getLayerFramebuffer() );
+                        Renderer::setClearedColor( glm::vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+                        Renderer::clear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+                        Renderer::renderFrameBuffer(
+                                passOutput,
+                                pass->getShader()
+                                );
+
+                        Renderer::endFrameBufferRender();
+                    }
+                }
             }
 
-            getState().m_ecs.lateUpdate();
+            // Second pass: Composite all layers
+            Renderer::beginFrameBufferRender( nullptr );
+            Renderer::setClearedColor( glm::vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+            Renderer::clear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+            for ( auto& layer : getState().layerStack() )
+            {
+                Renderer::renderFrameBuffer( layer->getLayerFramebuffer(), layer->getShader() );
+            }
 
+            // Window update
             m_window->onUpdate();
         }
         LOG_DEBUG() << "End";
@@ -68,12 +115,39 @@ namespace Tomos
         LOG_DEBUG() << p_e.toString();
 
         EventDispatcher dispatcher( p_e );
-        dispatcher.dispatch<WindowCloseEvent>( [this]( Event& p_event )
-        {
-            return onWindowClose( dynamic_cast<WindowCloseEvent&>( p_event ) );
-        } );
+        dispatcher.dispatch<WindowCloseEvent>( [this]( Event& p_event ) { return onWindowClose( dynamic_cast<WindowCloseEvent&>( p_event ) ); } );
 
-        for ( auto it = getState().m_layerStack.end(); it != getState().m_layerStack.begin(); )
+        dispatcher.dispatch<WindowResizeEvent>(
+                [this]( Event& p_event )
+                {
+                    auto& e = dynamic_cast<WindowResizeEvent&>( p_event );
+                    int   viewportWidth, viewportHeight;
+                    int   offsetX = 0,   offsetY = 0;
+
+                    if ( ( float ) e.getWidth() / ( float ) e.getHeight() > getWindow().getData().m_aspectRatio )
+                    {
+                        viewportHeight = e.getHeight();
+                        viewportWidth  = ( int ) ( e.getHeight() * getWindow().getData().m_aspectRatio );
+                        offsetX        = ( e.getWidth() - viewportWidth ) / 2;
+                    }
+                    else
+                    {
+                        viewportWidth  = e.getWidth();
+                        viewportHeight = ( int ) ( e.getWidth() / getWindow().getData().m_aspectRatio );
+                        offsetY        = ( e.getHeight() - viewportHeight ) / 2;
+                    }
+
+                    // Resize all framebuffers
+                    for ( auto& layer : getState().layerStack() )
+                    {
+                        layer->onResize( e.getWidth(), e.getHeight() );
+                    }
+
+                    glViewport( offsetX, offsetY, viewportWidth, viewportHeight );
+                    return false;
+                } );
+
+        for ( auto it = getState().layerStack().end(); it != getState().layerStack().begin(); )
         {
             ( *--it )->onEvent( p_e );
             if ( p_e.isHandled() )
@@ -91,7 +165,15 @@ namespace Tomos
 
     Window& Application::getWindow() const { return *m_window; }
 
-    void Application::PushLayer( Layer* p_layer ) { getState().m_layerStack.pushLayer( p_layer ); }
+    void Application::pushLayer( Layer* p_layer )
+    {
+        getState().layerStack().pushLayer( p_layer );
+        p_layer->onAttach();
+    }
 
-    void Application::PushOverlay( Layer* p_overlay ) { getState().m_layerStack.pushOverlay( p_overlay ); }
+    void Application::pushOverlay( Layer* p_overlay )
+    {
+        getState().layerStack().pushOverlay( p_overlay );
+        p_overlay->onAttach();
+    }
 } // namespace Tomos
