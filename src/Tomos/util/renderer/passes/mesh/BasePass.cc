@@ -1,5 +1,5 @@
 // GeometryPass.cpp
-#include "GeometryPass.hh"
+#include "BasePass.hh"
 #include "Tomos/core/Application.hh"
 #include "Tomos/systems/camera/CameraSystem.hh"
 #include "Tomos/systems/mesh/MeshSystem.hh"
@@ -7,7 +7,7 @@
 
 namespace Tomos
 {
-    GeometryPass::GeometryPass()
+    BasePass::BasePass()
     {
         int width  = Application::get()->getWindow().getData().m_width;
         int height = Application::get()->getWindow().getData().m_height;
@@ -15,7 +15,7 @@ namespace Tomos
         m_buffer = std::make_shared<FrameBuffer>( width, height );
     }
 
-    void GeometryPass::apply( int p_layerId, const glm::mat4& p_viewProj )
+    void BasePass::apply( int p_layerId, const glm::mat4& p_viewProj )
     {
         Renderer::beginFrameBufferRender( m_buffer );
         Renderer::setClearedColor( glm::vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
@@ -40,7 +40,7 @@ namespace Tomos
         Renderer::endBatch( ecs.getSystem<CameraSystem>().getViewProjectionMat( p_layerId ) );
     }
 
-    void GeometryPass::onResize( int p_width, int p_height )
+    void BasePass::onResize( int p_width, int p_height )
     {
         m_buffer->resize( p_width, p_height );
     }

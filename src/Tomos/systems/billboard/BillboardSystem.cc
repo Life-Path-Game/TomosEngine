@@ -1,17 +1,18 @@
 //
-// Created by dstuden on 4/1/25.
+// Created by dstuden on 5/31/25.
 //
 
-#include "MeshSystem.hh"
+#include "BillboardSystem.hh"
 
 #include "Tomos/core/Application.hh"
 #include "Tomos/systems/camera/CameraSystem.hh"
+#include "Tomos/util/logger/Logger.hh"
 
 namespace Tomos
 {
-    void MeshSystem::componentAdded( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
+    void BillboardSystem::componentAdded( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
     {
-        auto meshComponent = std::dynamic_pointer_cast<MeshComponent>( p_component );
+        auto meshComponent = std::dynamic_pointer_cast<BillboardComponent>( p_component );
         if ( m_components.contains( p_node->getLayerId() ) && !m_components[p_node->getLayerId()].erase( p_component ) )
         {
             LOG_DEBUG() << "Component moved to new node: " << p_component->m_name;
@@ -19,15 +20,16 @@ namespace Tomos
         m_components[p_node->getLayerId()][p_component] = p_node;
     }
 
-    void MeshSystem::componentRemoved( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
+    void BillboardSystem::componentRemoved( const std::shared_ptr<Component>& p_component, const std::shared_ptr<Node>& p_node )
     {
         if ( m_components.contains( p_node->getLayerId() ) )
             m_components[p_node->getLayerId()].erase( p_component );
     }
 
-    void MeshSystem::lateUpdate( int p_layerId )
+
+
+    void BillboardSystem::lateUpdate( int p_layerId )
     {
-        // Get view projection matrix once
         auto sys      = Application::getState().ecs().getSystem<CameraSystem>();
         auto viewProj = sys.getViewProjectionMat( p_layerId );
 
@@ -42,9 +44,8 @@ namespace Tomos
         {
             if ( !node->isActive() ) continue;
 
-            auto meshComponent = std::dynamic_pointer_cast<MeshComponent>( component );
-            auto mesh          = meshComponent->getMesh();
-            auto material      = meshComponent->getMaterial();
+            auto billboardComponent = std::dynamic_pointer_cast<BillboardComponent>( component );
+            billboardComponent->
 
             if ( mesh && material )
             {
@@ -58,14 +59,14 @@ namespace Tomos
         }
     }
 
-    const std::vector<DrawCall>& MeshSystem::getDrawCalls( int layerId ) const
+    const std::vector<DrawCall>& BillboardSystem::getDrawCalls( int layerId ) const
     {
         static const std::vector<DrawCall> empty;
         auto                               it = m_drawCalls.find( layerId );
         return it != m_drawCalls.end() ? it->second : empty;
     }
 
-    void MeshSystem::clearDrawCalls( int layerId )
+    void BillboardSystem::clearDrawCalls( int layerId )
     {
         m_drawCalls[layerId].clear();
     }

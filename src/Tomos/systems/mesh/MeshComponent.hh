@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-#include "../../util/renderer/Mesh.hh"
+#include "Mesh.hh"
 #include "../../util/renderer/Material.hh"
 #include "Tomos/systems/Component.hh"
 

@@ -240,10 +240,15 @@ namespace Tomos
         if ( !shaderToUse )
         {
             // Create default post-process shader if not exists
-            g_defaultPostProcessShader = std::make_shared<Shader>(
-                    ResourceManager::getShaderPath( "screen_quad_vertex.glsl" ),
-                    ResourceManager::getShaderPath( "screen_quad_fragment.glsl" )
-                    );
+            g_defaultPostProcessShader = ResourceManager::getShader( "default_post_process" );
+            if ( !g_defaultPostProcessShader )
+            {
+                g_defaultPostProcessShader = std::make_shared<Shader>(
+                        ResourceManager::getShaderPath( "screen_quad_vertex.glsl" ),
+                        ResourceManager::getShaderPath( "screen_quad_fragment.glsl" )
+                        );
+                ResourceManager::cacheShader( "default_post_process", g_defaultPostProcessShader );
+            }
             shaderToUse = g_defaultPostProcessShader;
         }
 

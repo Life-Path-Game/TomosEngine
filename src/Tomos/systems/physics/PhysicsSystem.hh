@@ -12,11 +12,6 @@ namespace Tomos
         std::string m_name = "ColliderComponent";
     };
 
-    /*
-     * ! SPECIAL SYSTEM !
-     * Can be used on the variable time step or on a separate fixed time step
-     * Register it in the ECS either as a normal system or as a fixed time step system
-     */
     class PhysicsSystem : public FixedTimeStepSystem
     {
     public:

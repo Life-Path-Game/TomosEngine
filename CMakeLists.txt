@@ -70,6 +70,8 @@ add_library(${PROJECT_NAME} STATIC
         src/Tomos/systems/mesh/MeshComponent.hh
         src/Tomos/systems/mesh/MeshSystem.cc
         src/Tomos/systems/mesh/MeshSystem.hh
+        src/Tomos/systems/mesh/Mesh.cc
+        src/Tomos/systems/mesh/Mesh.hh
         src/Tomos/util/gltfLoader/GLBLoader.cc
         src/Tomos/util/gltfLoader/GLBLoader.hh
         src/Tomos/util/renderer/Texture.cc
@@ -92,8 +94,6 @@ add_library(${PROJECT_NAME} STATIC
         src/Tomos/lib/imgui/imstb_rectpack.h
         src/Tomos/lib/imgui/imstb_textedit.h
         src/Tomos/lib/imgui/imstb_truetype.h
-        src/Tomos/util/renderer/Mesh.cc
-        src/Tomos/util/renderer/Mesh.hh
         src/Tomos/util/renderer/Material.cc
         src/Tomos/util/renderer/Material.hh
         src/Tomos/util/renderer/FrameBuffer.cc
@@ -102,8 +102,12 @@ add_library(${PROJECT_NAME} STATIC
         src/Tomos/core/Scene.hh
         src/Tomos/util/conf/Config.hh
         src/Tomos/util/renderer/passes/RenderPass.hh
-        src/Tomos/util/renderer/passes/mesh/GeometryPass.cc
-        src/Tomos/util/renderer/passes/mesh/GeometryPass.hh
+        src/Tomos/util/renderer/passes/mesh/BasePass.cc
+        src/Tomos/util/renderer/passes/mesh/BasePass.hh
+        src/Tomos/systems/billboard/BillboardSystem.cc
+        src/Tomos/systems/billboard/BillboardSystem.hh
+        src/Tomos/systems/billboard/BillboardComponent.hh
+        src/Tomos/util/resourceManager/ResourceManager.cc
 
 )
 

@@ -4,10 +4,13 @@
 
 namespace Tomos
 {
-    class GeometryPass : public RenderPass
+    /*
+     This render pass is responsible for rendering geometry, sprites and other base objects.
+     */
+    class BasePass : public RenderPass
     {
     public:
-        GeometryPass();
+        BasePass();
 
         void                         apply( int p_layerId, const glm::mat4& p_viewProj ) override;
         void                         onResize( int p_width, int p_height ) override;

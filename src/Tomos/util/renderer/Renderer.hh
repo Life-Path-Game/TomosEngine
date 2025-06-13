@@ -1,3 +1,4 @@
+#pragma once
 #include "FrameBuffer.hh"
 #include "Shader.hh"
 #include "VertexArray.hh"
@@ -5,6 +6,14 @@
 
 namespace Tomos
 {
+    struct DrawCall
+    {
+        std::shared_ptr<Shader>      m_shader;
+        std::shared_ptr<Material>    m_material;
+        std::shared_ptr<VertexArray> m_vertexArray;
+        glm::mat4                    m_transform;
+    };
+
     struct BatchData
     {
         std::shared_ptr<VertexArray> m_vertexArray;

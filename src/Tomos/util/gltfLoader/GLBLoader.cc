@@ -14,9 +14,6 @@
 
 namespace Tomos
 {
-    // Static cache instance
-    inline GLBLoader::GLBResourceCache g_resourceCache;
-
     GLBLoader::LoadResult GLBLoader::loadGLB( const std::string& p_filepath, const std::shared_ptr<Shader>& p_shader, bool p_useCache )
     {
         LoadResult result;
@@ -167,11 +164,7 @@ namespace Tomos
             // Check cache if enabled
             if ( p_useCache )
             {
-                auto it = g_resourceCache.m_meshCache.find( meshKey );
-                if ( it != g_resourceCache.m_meshCache.end() )
-                {
-                    meshComponent = it->second;
-                }
+                meshComponent = ResourceManager::getMesh( meshKey );
             }
 
             // If not in cache, create new mesh
@@ -274,7 +267,7 @@ namespace Tomos
                 // Add to cache if enabled
                 if ( p_useCache )
                 {
-                    g_resourceCache.m_meshCache[meshKey] = meshComponent;
+                    ResourceManager::cacheMesh( meshKey, meshComponent );
                 }
             }
 
@@ -307,10 +300,10 @@ namespace Tomos
         // Check cache if enabled
         if ( p_useCache )
         {
-            auto it = g_resourceCache.m_materialCache.find( materialKey );
-            if ( it != g_resourceCache.m_materialCache.end() )
+            auto m = ResourceManager::getMaterial( materialKey );
+            if ( m )
             {
-                return it->second;
+                return m;
             }
         }
 
@@ -380,7 +373,7 @@ namespace Tomos
         // Add to cache if enabled
         if ( p_useCache )
         {
-            g_resourceCache.m_materialCache[materialKey] = material;
+            ResourceManager::cacheMaterial( materialKey, material );
         }
 
         return material;
@@ -413,10 +406,10 @@ namespace Tomos
         // Check cache if enabled
         if ( p_useCache )
         {
-            auto it = g_resourceCache.m_textureCache.find( textureKey );
-            if ( it != g_resourceCache.m_textureCache.end() )
+            auto cachedTexture = ResourceManager::getTexture( textureKey );
+            if ( cachedTexture )
             {
-                return it->second;
+                return cachedTexture;
             }
         }
 
@@ -440,7 +433,7 @@ namespace Tomos
         // Add to cache if enabled and loaded successfully
         if ( p_useCache && textureObj )
         {
-            g_resourceCache.m_textureCache[textureKey] = textureObj;
+            ResourceManager::cacheTexture( textureKey, textureObj );
         }
 
         return textureObj;
@@ -457,12 +450,5 @@ namespace Tomos
                                            0.5f, // alpha cutoff
                                            AlphaMode::OPAQUE, Material::getDefaultWhite(), Material::getDefaultWhite(), nullptr, Material::getDefaultNormal(),
                                            Sampler::createLinearRepeat(), "DefaultMaterial" );
-    }
-
-    void GLBLoader::clearCache()
-    {
-        g_resourceCache.m_meshCache.clear();
-        g_resourceCache.m_materialCache.clear();
-        g_resourceCache.m_textureCache.clear();
     }
 } // namespace Tomos

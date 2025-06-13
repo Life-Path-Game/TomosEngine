@@ -9,6 +9,7 @@
 
 namespace Tomos
 {
+
     std::shared_ptr<Texture> Texture::createWhiteTexture()
     {
         GLuint textureID;

@@ -1,4 +1,4 @@
-#include "Mesh.hh"
+#include "../../systems/mesh/Mesh.hh"
 
 #include "Tomos/util/logger/Logger.hh"
 #include "Tomos/util/renderer/Renderer.hh"
